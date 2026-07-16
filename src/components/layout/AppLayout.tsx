@@ -1,6 +1,7 @@
 import { Outlet, useLocation } from 'react-router-dom'
 import { BottomTabBar } from './BottomTabBar'
 import { RestTimerBar } from '../RestTimerBar'
+import { UpdatePrompt } from '../UpdatePrompt'
 
 /**
  * Contenedor global móvil-first: área de contenido con scroll + tab bar fija.
@@ -19,6 +20,8 @@ export function AppLayout() {
       </main>
       {/* Temporizador de descanso flotante (visible solo cuando corre). */}
       <RestTimerBar />
+      {/* Aviso de actualización / listo para offline (PWA). */}
+      <UpdatePrompt />
       <BottomTabBar />
     </div>
   )

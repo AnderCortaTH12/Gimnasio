@@ -124,7 +124,11 @@ GImnasio/
     `esBackupValido` en `db.ts`; sección en Perfil (`BackupSection`) con
     descarga `forja-backup-{fecha}.json`, importación con validación +
     confirmación (reemplaza todo en una transacción) y feedback con `Toast`.
-  - **6.2 PWA**: manifest + service worker (instalable/offline).
+  - **6.2 PWA** ✅: `vite-plugin-pwa` (Workbox) con manifest (standalone,
+    portrait, iconos 192/512/maskable en `public/icons/`), precache del bundle
+    + `navigateFallback`, runtime caching (fuentes Google + GIFs GitHub
+    cache-first), y banner de actualización (`UpdatePrompt` con `useRegisterSW`).
+    Iconos generados con `scripts/gen-icons.mjs` (sharp).
   - **6.3 Dataset completo**: integrar los **1.324 ejercicios** de
     `hasaneyldrm/exercises-dataset` con cacheo en IndexedDB.
 
