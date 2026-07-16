@@ -30,6 +30,9 @@ export interface BodyMetric {
   notes?: string
 }
 
+/** Objetivo de entrenamiento del usuario. */
+export type TrainingGoal = 'fuerza' | 'hipertrofia' | 'mantenimiento'
+
 export interface UserProfile {
   /** Clave fija; solo existe un perfil (monousuario). */
   id: 'profile'
@@ -39,11 +42,13 @@ export interface UserProfile {
   units: UnitSystem
   /** Altura en cm. */
   heightCm?: number
-  /** Fecha de nacimiento en formato ISO 8601. */
-  birthDate?: string
+  /** Edad en años (para cálculos e interpretación). */
+  age?: number
   /** Sexo biológico, usado en fórmulas opcionales. */
   sex?: 'hombre' | 'mujer' | 'otro'
-  /** Objetivo de peso corporal. */
+  /** Objetivo de entrenamiento. */
+  trainingGoal?: TrainingGoal
+  /** Objetivo de peso corporal (kg). */
   targetWeight?: number
   /** Días de entrenamiento objetivo por semana. */
   weeklyGoal?: number

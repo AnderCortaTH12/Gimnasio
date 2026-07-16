@@ -102,9 +102,12 @@ GImnasio/
   temporizador de descanso configurable con pitido + vibración, finalizar
   sesión, historial real con detalle, y duplicar sesión como plantilla. Todo
   sobrevive a recargar. `db.ts` implementado (sin stubs).
-- **Fase 3 — Perfil y medidas** (sección 4.2): peso corporal, altura, IMC,
-  evolución. *(Nota: el documento maestro pone perfil/medidas como Fase 3 y
-  progreso como Fase 4.)*
+- **Fase 3 — Perfil y medidas corporales** ✅ (sección 4.2): perfil editable y
+  persistente (nombre, altura, edad, sexo, objetivo), registro de peso corporal
+  con fecha + gráfica de evolución (Recharts), IMC automático con interpretación
+  por rangos y color, y otras medidas (cintura, brazo, pecho, grasa…) con
+  registro/borrado y gráfica por tipo. Estados vacíos elegantes. Utilidades:
+  `lib/imc.ts`, `data/metrics.ts`. Componentes en `components/body/`.
 - **Fase 4 — Progreso y PRs**: detección de récords, gráficas (Recharts),
   volumen por grupo muscular.
 - **Fase 5 — Medidas corporales**: registro y evolución de peso/perímetros.

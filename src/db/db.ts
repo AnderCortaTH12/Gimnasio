@@ -207,6 +207,26 @@ export async function guardarPerfil(profile: UserProfile): Promise<void> {
   await db.profile.put({ ...profile, updatedAt: Date.now() })
 }
 
+/**
+ * Aplica cambios parciales al perfil, creándolo si aún no existe.
+ * Devuelve el perfil resultante.
+ */
+export async function actualizarPerfil(
+  patch: Partial<Omit<UserProfile, 'id' | 'createdAt' | 'updatedAt'>>,
+): Promise<UserProfile> {
+  const now = Date.now()
+  const actual = await leerPerfil()
+  const base: UserProfile = actual ?? {
+    id: 'profile',
+    units: 'metrico',
+    createdAt: now,
+    updatedAt: now,
+  }
+  const next: UserProfile = { ...base, ...patch, id: 'profile', updatedAt: now }
+  await db.profile.put(next)
+  return next
+}
+
 // ---------------------------------------------------------------------------
 // Medidas corporales
 // ---------------------------------------------------------------------------
@@ -228,4 +248,17 @@ export async function leerMedidas(
     ? await db.bodyMetrics.where('type').equals(type).toArray()
     : await db.bodyMetrics.toArray()
   return all.sort((a, b) => a.date.localeCompare(b.date))
+}
+
+/** Devuelve la última medida (más reciente) de un tipo, o undefined. */
+export async function ultimaMedida(
+  type: BodyMetric['type'],
+): Promise<BodyMetric | undefined> {
+  const medidas = await leerMedidas(type)
+  return medidas[medidas.length - 1]
+}
+
+/** Elimina una medida corporal por id. */
+export async function eliminarMedida(id: string): Promise<void> {
+  await db.bodyMetrics.delete(id)
 }
