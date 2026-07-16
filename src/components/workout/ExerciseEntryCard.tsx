@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Plus, MoreVertical, Trash2, StickyNote } from 'lucide-react'
 import type { ExerciseEntry, SetEntry } from '../../types'
+import { obtenerEjercicio } from '../../data/catalogRegistry'
+import { ExerciseGif } from '../ExerciseGif'
 import { Card } from '../ui'
 import { SetRow } from './SetRow'
 
@@ -27,11 +29,19 @@ export function ExerciseEntryCard({
   const [menu, setMenu] = useState(false)
   const [notasAbiertas, setNotasAbiertas] = useState(!!entry.notes)
   const completadas = entry.sets.filter((s) => s.completed).length
+  // Resolvemos el ejercicio del catálogo para mostrar su animación.
+  const ejercicio = obtenerEjercicio(entry.exerciseId)
 
   return (
     <Card className="p-3">
       {/* Cabecera */}
       <div className="mb-2 flex items-center gap-2">
+        <ExerciseGif
+          gifUrl={ejercicio?.gifUrl}
+          name={entry.exerciseName}
+          variant="preview"
+          className="shrink-0"
+        />
         <div className="min-w-0 flex-1">
           <p className="truncate font-bold text-text">{entry.exerciseName}</p>
           <p className="text-xs text-text/40">
