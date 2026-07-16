@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-bg text-text font-sans antialiased;
+  }
+
+  /* Los números tabulares evitan saltos de ancho en contadores y pesos */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
