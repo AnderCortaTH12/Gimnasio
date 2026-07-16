@@ -1,9 +1,11 @@
 import { useNavigate } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { Plus, Flame, Play, Clock, Trophy, ChevronRight } from 'lucide-react'
+import { Plus, Flame, Play, Clock, Trophy, ChevronRight, Sparkles } from 'lucide-react'
 import { useSessionStore } from '../store/sessionStore'
-import { leerHistorial, calcularVolumen } from '../db/db'
+import { leerHistorial, leerPerfil, calcularVolumen } from '../db/db'
+import { generarRecomendaciones } from '../recommendations'
 import { PageTitle } from '../components/PageTitle'
+import { RecommendationCard } from '../components/RecommendationCard'
 import { Button, Card, StatNumber, SectionHeader, Badge } from '../components/ui'
 
 const HOY = new Date().toLocaleDateString('es-ES', {
@@ -25,7 +27,14 @@ export function TodayScreen() {
 
   // Historial reactivo: se recalcula solo al guardar una sesión.
   const historial = useLiveQuery(() => leerHistorial(20), [], [])
+  const perfil = useLiveQuery(async () => (await leerPerfil()) ?? null, [], null)
   const ultima = historial[0]
+
+  // Recomendaciones (reglas explicables) a partir del historial y el perfil.
+  const recomendaciones = generarRecomendaciones(
+    historial,
+    perfil ?? undefined,
+  )
 
   // Resumen simple de la semana (sesiones de los últimos 7 días).
   const haceUnaSemana = Date.now() - 7 * 24 * 3600 * 1000
@@ -91,6 +100,24 @@ export function TodayScreen() {
         >
           Empezar entrenamiento
         </Button>
+      )}
+
+      {/* Recomendaciones (reglas explicables) */}
+      {recomendaciones.length > 0 && (
+        <div className="mb-6">
+          <SectionHeader
+            title="Recomendaciones"
+            subtitle="Basadas en tu historial y objetivo"
+            action={
+              <Sparkles className="h-4 w-4 text-lime" aria-hidden />
+            }
+          />
+          <div className="flex flex-col gap-2.5">
+            {recomendaciones.map((rec) => (
+              <RecommendationCard key={rec.id} rec={rec} />
+            ))}
+          </div>
+        </div>
       )}
 
       {/* Último entrenamiento */}

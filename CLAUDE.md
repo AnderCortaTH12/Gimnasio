@@ -114,9 +114,11 @@ GImnasio/
   ejercicio (selector + métrica peso/1RM/volumen + gráfica), volumen por músculo
   (7d/30d), récords recientes y "grupos a recuperar". Detección de récords al
   finalizar sesión con celebración + confeti (`PRCelebration`).
-- **Fase 5 — Motor de recomendaciones** (sección 4.4): sugerencias basadas en
-  reglas (equilibrio muscular, progresión de carga, descanso, variación, rutina
-  del día), cada una con su porqué.
+- **Fase 5 — Motor de recomendaciones** ✅ (sección 4.4): reglas explicables en
+  `src/recommendations/` (umbrales en `rules.ts`, lógica en `engine.ts`):
+  descanso <48h, equilibrio muscular, progresión de carga, variación y rutina
+  del día. Cada recomendación lleva su porqué. Se muestran en la pantalla Hoy
+  (`RecommendationCard`).
 - **Fase 6 — Copia de seguridad, PWA y dataset completo** (secciones 4.5 y 6):
   exportar/importar JSON, manifest + service worker (instalable/offline) e
   integrar los **1.324 ejercicios** de `hasaneyldrm/exercises-dataset` (uso
