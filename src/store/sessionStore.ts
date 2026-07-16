@@ -15,9 +15,11 @@ import {
   guardarSesion,
   eliminarSesion,
   obtenerSesionActiva,
+  leerHistorial,
   nuevoId,
   calcularVolumen,
 } from '../db/db'
+import { detectarPRs, type PRHallado } from '../lib/stats'
 
 interface SessionState {
   /** Sesión en curso, o null si no hay ninguna. */
@@ -32,8 +34,11 @@ interface SessionState {
   iniciar: (name?: string) => Promise<void>
   /** Duplica una sesión previa como nueva sesión activa (plantilla). */
   duplicar: (origen: WorkoutSession) => Promise<void>
-  /** Finaliza la sesión activa (pasa a "completada"). */
-  finalizar: () => Promise<void>
+  /**
+   * Finaliza la sesión activa (pasa a "completada"), detecta récords y los
+   * devuelve para su celebración.
+   */
+  finalizar: () => Promise<PRHallado[]>
   /** Cancela y elimina la sesión activa sin guardarla en el historial. */
   cancelar: () => Promise<void>
 
@@ -90,9 +95,13 @@ export const useSessionStore = create<SessionState>((set, get) => ({
 
   finalizar: async () => {
     const current = get().active
-    if (!current) return
-    await finalizarSesion(current)
+    if (!current) return []
+    // Compara con el historial previo para detectar y marcar récords.
+    const previas = await leerHistorial()
+    const { session, prs } = detectarPRs(current, previas)
+    await finalizarSesion(session)
     set({ active: null })
+    return prs
   },
 
   cancelar: async () => {

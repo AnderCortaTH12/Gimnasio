@@ -7,6 +7,8 @@ import { calcularVolumen } from '../db/db'
 import { Button, EmptyState, StatNumber } from '../components/ui'
 import { ExercisePickerSheet } from '../components/ExercisePickerSheet'
 import { ExerciseEntryCard } from '../components/workout/ExerciseEntryCard'
+import { PRCelebration } from '../components/workout/PRCelebration'
+import type { PRHallado } from '../lib/stats'
 import { cn } from '../lib/cn'
 
 /** Formatea milisegundos a m:ss o h:mm:ss. */
@@ -41,6 +43,10 @@ export function WorkoutScreen() {
 
   const [picker, setPicker] = useState(false)
   const [ajustesDescanso, setAjustesDescanso] = useState(false)
+  const [prs, setPrs] = useState<PRHallado[] | null>(null)
+  // Evita que el efecto de redirección salte mientras se finaliza (la sesión
+  // activa pasa a null antes de que se resuelva la detección de récords).
+  const [finalizando, setFinalizando] = useState(false)
   const [, setTick] = useState(0)
 
   // Cronómetro de la sesión: refresca cada segundo.
@@ -50,9 +56,24 @@ export function WorkoutScreen() {
   }, [])
 
   // Si no hay sesión activa (ya hidratado), volver a Hoy.
+  // Excepción: mientras se muestra la celebración de récords.
   useEffect(() => {
-    if (hydrated && !active) navigate('/', { replace: true })
-  }, [hydrated, active, navigate])
+    if (hydrated && !active && !prs && !finalizando)
+      navigate('/', { replace: true })
+  }, [hydrated, active, prs, finalizando, navigate])
+
+  // Celebración de récords tras finalizar (la sesión activa ya es null).
+  if (prs) {
+    return (
+      <PRCelebration
+        prs={prs}
+        onClose={() => {
+          setPrs(null)
+          navigate('/historial', { replace: true })
+        }}
+      />
+    )
+  }
 
   if (!active) return null
 
@@ -78,8 +99,14 @@ export function WorkoutScreen() {
       !window.confirm('No has completado ninguna serie. ¿Finalizar igualmente?')
     )
       return
-    await finalizar()
-    navigate('/historial', { replace: true })
+    setFinalizando(true)
+    const records = await finalizar()
+    // Si hay récords, celebra antes de salir; si no, va directo al historial.
+    if (records.length > 0) {
+      setPrs(records)
+    } else {
+      navigate('/historial', { replace: true })
+    }
   }
 
   const handleCancelar = async () => {

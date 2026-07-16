@@ -108,8 +108,12 @@ GImnasio/
   por rangos y color, y otras medidas (cintura, brazo, pecho, grasa…) con
   registro/borrado y gráfica por tipo. Estados vacíos elegantes. Utilidades:
   `lib/imc.ts`, `data/metrics.ts`. Componentes en `components/body/`.
-- **Fase 4 — Progreso y PRs**: detección de récords, gráficas (Recharts),
-  volumen por grupo muscular.
+- **Fase 4 — Progreso, PRs y dashboard** ✅ (sección 4.3): analítica pura en
+  `lib/stats.ts` (Epley 1RM, volumen, racha, reparto muscular, detección de
+  PRs). Pantalla Progreso: dashboard (7 días, racha, PRs), progreso por
+  ejercicio (selector + métrica peso/1RM/volumen + gráfica), volumen por músculo
+  (7d/30d), récords recientes y "grupos a recuperar". Detección de récords al
+  finalizar sesión con celebración + confeti (`PRCelebration`).
 - **Fase 5 — Medidas corporales**: registro y evolución de peso/perímetros.
 - **Fase 6 — Perfil y ajustes**: unidades, objetivos, exportar/importar datos.
 - **Fase 7 — Dataset completo**: integrar los 1.324 ejercicios de

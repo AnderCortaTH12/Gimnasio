@@ -35,10 +35,15 @@ export default {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },
         },
+        confetti: {
+          '0%': { transform: 'translateY(0) rotate(0deg)', opacity: '1' },
+          '100%': { transform: 'translateY(110vh) rotate(540deg)', opacity: '0' },
+        },
       },
       animation: {
         'fade-in-up': 'fadeInUp 0.25s ease-out',
         'fade-in': 'fadeIn 0.2s ease-out',
+        confetti: 'confetti 2.2s ease-in forwards',
       },
     },
   },
