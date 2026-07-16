@@ -3,7 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { User, Pencil, Plus, Scale, Ruler, Cake } from 'lucide-react'
 import { leerPerfil, leerMedidas } from '../db/db'
 import type { BodyMetric, BodyMetricType } from '../types'
-import { METRIC_META, MEDIDAS_PERIMETRO } from '../data/metrics'
+import { MEDIDAS_PERIMETRO } from '../data/metrics'
 import { PageTitle } from '../components/PageTitle'
 import {
   Card,
@@ -19,6 +19,7 @@ import { MetricHistory } from '../components/body/MetricHistory'
 import { MetricChart } from '../components/MetricChart'
 import { EditProfileSheet } from '../components/body/EditProfileSheet'
 import { AddMetricSheet } from '../components/body/AddMetricSheet'
+import { BackupSection } from '../components/body/BackupSection'
 
 const OBJETIVO_LABEL: Record<string, string> = {
   fuerza: 'Fuerza',
@@ -202,8 +203,11 @@ export function ProfileScreen() {
         </>
       )}
 
+      {/* Copia de seguridad */}
+      <BackupSection />
+
       <p className="mt-2 text-center text-xs text-text/30">
-        FORJA · v0.3 · Fase 3
+        FORJA · v0.6 · Fase 6
       </p>
 
       {/* Hojas modales */}
@@ -222,11 +226,6 @@ export function ProfileScreen() {
         open={nuevaMedida}
         onClose={() => setNuevaMedida(false)}
       />
-
-      {/* Aviso: los datos viven en el dispositivo */}
-      <p className="mt-1 text-center text-[11px] leading-relaxed text-text/25">
-        {METRIC_META.peso.label} y medidas se guardan solo en este dispositivo.
-      </p>
     </div>
   )
 }

@@ -120,9 +120,13 @@ GImnasio/
   del día. Cada recomendación lleva su porqué. Se muestran en la pantalla Hoy
   (`RecommendationCard`).
 - **Fase 6 — Copia de seguridad, PWA y dataset completo** (secciones 4.5 y 6):
-  exportar/importar JSON, manifest + service worker (instalable/offline) e
-  integrar los **1.324 ejercicios** de `hasaneyldrm/exercises-dataset` (uso
-  personal/no comercial) con cacheo en IndexedDB.
+  - **6.1 Backup export/import** ✅: `exportarDatos`/`importarDatos`/
+    `esBackupValido` en `db.ts`; sección en Perfil (`BackupSection`) con
+    descarga `forja-backup-{fecha}.json`, importación con validación +
+    confirmación (reemplaza todo en una transacción) y feedback con `Toast`.
+  - **6.2 PWA**: manifest + service worker (instalable/offline).
+  - **6.3 Dataset completo**: integrar los **1.324 ejercicios** de
+    `hasaneyldrm/exercises-dataset` con cacheo en IndexedDB.
 
 > **Animaciones/microinteracciones**: no son una fase aparte. La base
 > (feedback al pulsar, transiciones de pestaña, pill de la tab activa, hojas

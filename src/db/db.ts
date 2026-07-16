@@ -270,3 +270,85 @@ export async function actualizarMedida(
 export async function eliminarMedida(id: string): Promise<void> {
   await db.bodyMetrics.delete(id)
 }
+
+// ---------------------------------------------------------------------------
+// Copia de seguridad (export / import)
+// ---------------------------------------------------------------------------
+
+/** Versión del formato de backup, por si el esquema cambia en el futuro. */
+export const BACKUP_VERSION = 1
+
+/** Estructura de un archivo de copia de seguridad de FORJA. */
+export interface BackupData {
+  app: 'forja'
+  version: number
+  exportedAt: string
+  sessions: WorkoutSession[]
+  exercises: Exercise[]
+  bodyMetrics: BodyMetric[]
+  profile: UserProfile[]
+}
+
+/** Lee todas las tablas y devuelve un objeto de backup serializable. */
+export async function exportarDatos(): Promise<BackupData> {
+  const [sessions, exercises, bodyMetrics, profile] = await Promise.all([
+    db.sessions.toArray(),
+    db.exercises.toArray(),
+    db.bodyMetrics.toArray(),
+    db.profile.toArray(),
+  ])
+  return {
+    app: 'forja',
+    version: BACKUP_VERSION,
+    exportedAt: new Date().toISOString(),
+    sessions,
+    exercises,
+    bodyMetrics,
+    profile,
+  }
+}
+
+/** Valida (de forma defensiva) que un objeto tiene forma de backup de FORJA. */
+export function esBackupValido(data: unknown): data is BackupData {
+  if (typeof data !== 'object' || data === null) return false
+  const d = data as Record<string, unknown>
+  return (
+    d.app === 'forja' &&
+    typeof d.version === 'number' &&
+    Array.isArray(d.sessions) &&
+    Array.isArray(d.exercises) &&
+    Array.isArray(d.bodyMetrics) &&
+    Array.isArray(d.profile)
+  )
+}
+
+/**
+ * Restaura un backup: BORRA los datos actuales y escribe los del archivo.
+ * Todo en una única transacción para no dejar la base a medias.
+ */
+export async function importarDatos(data: BackupData): Promise<void> {
+  if (!esBackupValido(data)) {
+    throw new Error('El archivo no es una copia de seguridad válida de FORJA.')
+  }
+  await db.transaction(
+    'rw',
+    db.sessions,
+    db.exercises,
+    db.bodyMetrics,
+    db.profile,
+    async () => {
+      await Promise.all([
+        db.sessions.clear(),
+        db.exercises.clear(),
+        db.bodyMetrics.clear(),
+        db.profile.clear(),
+      ])
+      await Promise.all([
+        db.sessions.bulkPut(data.sessions),
+        db.exercises.bulkPut(data.exercises),
+        db.bodyMetrics.bulkPut(data.bodyMetrics),
+        db.profile.bulkPut(data.profile),
+      ])
+    },
+  )
+}
