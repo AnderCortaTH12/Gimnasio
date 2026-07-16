@@ -60,8 +60,19 @@ GImnasio/
    ├─ main.tsx             # Bootstrap de React
    ├─ App.tsx              # Pantalla raíz (placeholder por ahora)
    ├─ index.css            # Directivas Tailwind + base
+   ├─ components/
+   │  ├─ ui/               # Sistema de diseño: Card, Button, Badge,
+   │  │                    #   StatNumber, SectionHeader, EmptyState
+   │  ├─ layout/           # AppLayout + BottomTabBar
+   │  └─ PageTitle.tsx     # Cabecera grande de pantalla
+   ├─ screens/             # Una pantalla por pestaña + detalle de ejercicio
+   ├─ data/
+   │  ├─ exercisesSeed.ts  # ~48 ejercicios embebidos
+   │  └─ muscles.ts        # Traducción EN→ES y listas de filtros
+   ├─ lib/
+   │  └─ cn.ts             # Helper de clases condicionales
    ├─ types/               # Tipos de dominio
-   │  ├─ exercise.ts       # Exercise y enums relacionados
+   │  ├─ exercise.ts       # Exercise (claves en inglés) y enums
    │  ├─ workout.ts        # WorkoutSession, ExerciseEntry, SetEntry
    │  ├─ body.ts           # BodyMetric, UserProfile
    │  └─ index.ts          # Reexporta todo
@@ -69,19 +80,26 @@ GImnasio/
       └─ db.ts             # Dexie: esquema + stubs de funciones
 ```
 
+> Navegación: **react-router-dom v6**. Rutas: `/` (Hoy), `/historial`,
+> `/progreso`, `/ejercicios`, `/ejercicios/:id`, `/perfil`.
+
 ## Plan de fases
 
 - **Fase 0 — Andamiaje** ✅ *(actual)*: proyecto Vite, Tailwind con paleta,
   tipos de dominio, capa de datos Dexie con esquema y stubs, pantalla
   placeholder. Sin funcionalidades.
-- **Fase 1 — Registro de sesión**: crear sesión, añadir ejercicios y series,
+- **Fase 1 — Esqueleto visual navegable** ✅: layout móvil-first con bottom tab
+  bar (react-router), sistema de diseño (`components/ui`), seed de ~48
+  ejercicios, pantalla Ejercicios con buscador + filtros y detalle. Resto de
+  pantallas maquetadas con datos de muestra. Sin persistencia.
+- **Fase 2 — Registro de sesión**: crear sesión, añadir ejercicios y series,
   temporizador de descanso. Implementar stubs de `db.ts`.
-- **Fase 2 — Historial y detalle**: listado de sesiones, ver/editar sesión.
-- **Fase 3 — Progreso y PRs**: detección de récords, gráficas (Recharts),
+- **Fase 3 — Historial y detalle**: listado real de sesiones, ver/editar sesión.
+- **Fase 4 — Progreso y PRs**: detección de récords, gráficas (Recharts),
   volumen por grupo muscular.
-- **Fase 4 — Medidas corporales**: registro y evolución de peso/perímetros.
-- **Fase 5 — Perfil y ajustes**: unidades, objetivos, exportar/importar datos.
-- **Fase 6 — Dataset completo**: integrar los 1.324 ejercicios de
+- **Fase 5 — Medidas corporales**: registro y evolución de peso/perímetros.
+- **Fase 6 — Perfil y ajustes**: unidades, objetivos, exportar/importar datos.
+- **Fase 7 — Dataset completo**: integrar los 1.324 ejercicios de
   `hasaneyldrm/exercises-dataset` (uso personal/no comercial), buscador y
   cacheo en IndexedDB.
 

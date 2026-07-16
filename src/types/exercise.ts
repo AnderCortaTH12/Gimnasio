@@ -1,80 +1,70 @@
 /**
  * Modelo de un ejercicio del catálogo.
  *
- * Basado en el esquema del dataset público hasaneyldrm/exercises-dataset
- * (uso personal/no comercial). En las primeras fases trabajamos con un
- * subconjunto curado embebido; el dataset completo (1.324 ejercicios) se
- * integrará en la última fase y se cachea en IndexedDB.
+ * Las claves de músculo/equipo/categoría se guardan en INGLÉS (igual que el
+ * dataset público hasaneyldrm/exercises-dataset, uso personal/no comercial) y
+ * se traducen al español solo en la capa de UI mediante los mapas de
+ * `src/data/muscles.ts`. Así el dato es estable y la traducción vive en un
+ * único sitio.
  */
 
-/** Grupo muscular objetivo (normalizado a español para la UI). */
-export type MuscleGroup =
-  | 'pecho'
-  | 'espalda'
-  | 'hombros'
+/** Grupo/región muscular (claves en inglés del dataset). */
+export type MuscleKey =
+  | 'chest'
+  | 'back'
+  | 'shoulders'
   | 'biceps'
   | 'triceps'
-  | 'antebrazos'
-  | 'cuadriceps'
-  | 'isquios'
-  | 'gluteos'
-  | 'gemelos'
-  | 'abdominales'
-  | 'trapecio'
-  | 'lumbares'
+  | 'forearms'
+  | 'quadriceps'
+  | 'hamstrings'
+  | 'glutes'
+  | 'calves'
+  | 'abs'
+  | 'traps'
+  | 'lower_back'
+  | 'lats'
   | 'cardio'
-  | 'cuerpo-completo'
+  | 'full_body'
 
-/** Tipo de fuerza principal del movimiento. */
-export type Force = 'empuje' | 'traccion' | 'estatico'
-
-/** Nivel de dificultad sugerido. */
-export type Level = 'principiante' | 'intermedio' | 'avanzado'
-
-/** Mecánica del ejercicio. */
-export type Mechanic = 'compuesto' | 'aislamiento'
-
-/** Equipamiento necesario. */
-export type Equipment =
-  | 'barra'
-  | 'mancuernas'
-  | 'maquina'
-  | 'polea'
-  | 'peso-corporal'
+/** Equipamiento necesario (claves en inglés). */
+export type EquipmentKey =
+  | 'barbell'
+  | 'dumbbell'
+  | 'machine'
+  | 'cable'
+  | 'bodyweight'
   | 'kettlebell'
-  | 'banda'
-  | 'otro'
+  | 'band'
+  | 'other'
 
 /** Categoría general del ejercicio. */
 export type ExerciseCategory =
-  | 'fuerza'
-  | 'hipertrofia'
+  | 'strength'
+  | 'hypertrophy'
   | 'cardio'
-  | 'estiramiento'
-  | 'pliometria'
-  | 'strongman'
+  | 'stretching'
+  | 'plyometrics'
 
 export interface Exercise {
-  /** Identificador estable (viene del dataset o slug generado). */
+  /** Identificador estable (slug del dataset o generado). */
   id: string
-  /** Nombre visible del ejercicio. */
+  /** Nombre visible del ejercicio (en español para la UI). */
   name: string
-  /** Tipo de fuerza principal. */
-  force?: Force
-  /** Nivel de dificultad. */
-  level?: Level
-  /** Mecánica: compuesto o aislamiento. */
-  mechanic?: Mechanic
-  /** Equipamiento requerido. */
-  equipment?: Equipment
-  /** Músculos principales trabajados. */
-  primaryMuscles: MuscleGroup[]
-  /** Músculos secundarios. */
-  secondaryMuscles: MuscleGroup[]
-  /** Instrucciones paso a paso. */
-  instructions: string[]
   /** Categoría general. */
-  category?: ExerciseCategory
-  /** Rutas/URLs de imágenes ilustrativas. */
-  images: string[]
+  category: ExerciseCategory
+  /** Región corporal principal. */
+  bodyPart: MuscleKey
+  /** Equipamiento requerido. */
+  equipment: EquipmentKey
+  /** Grupo muscular principal trabajado. */
+  muscleGroup: MuscleKey
+  /** Músculos secundarios. */
+  secondaryMuscles: MuscleKey[]
+  /** Músculo objetivo específico (target), en inglés. */
+  target: MuscleKey
+  /** Instrucciones breves paso a paso (opcional, en inglés). */
+  instructions?: string[]
+  /** Rutas/URLs de imágenes ilustrativas (opcional). */
+  images?: string[]
 }
