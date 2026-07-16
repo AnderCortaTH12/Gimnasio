@@ -7,6 +7,7 @@ import {
   CATEGORY_ES,
 } from '../data/muscles'
 import { useSessionStore } from '../store/sessionStore'
+import { ExerciseGif } from '../components/ExerciseGif'
 import { Badge, Button, Card, EmptyState } from '../components/ui'
 
 export function ExerciseDetailScreen() {
@@ -40,10 +41,15 @@ export function ExerciseDetailScreen() {
         Volver
       </button>
 
-      {/* Cabecera visual */}
-      <div className="mb-5 flex flex-col items-center rounded-3xl border border-border bg-gradient-to-b from-surface to-bg px-6 py-8 text-center">
-        <div className="mb-3 flex h-20 w-20 items-center justify-center rounded-2xl bg-lime/10">
-          <Dumbbell className="h-9 w-9 text-lime" strokeWidth={2} />
+      {/* Cabecera visual con GIF animado */}
+      <div className="mb-5 flex flex-col items-center rounded-3xl border border-border bg-gradient-to-b from-surface to-bg px-6 py-6 text-center">
+        <div className="mb-4 w-full max-w-[300px]">
+          <ExerciseGif
+            gifUrl={ex.gifUrl}
+            name={ex.name}
+            variant="detail"
+            className="shadow-lg shadow-black/30"
+          />
         </div>
         <h1 className="text-xl font-black tracking-tight text-text">{ex.name}</h1>
         <div className="mt-3 flex flex-wrap justify-center gap-1.5">

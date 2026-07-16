@@ -67,4 +67,6 @@ export interface Exercise {
   instructions?: string[]
   /** Rutas/URLs de imágenes ilustrativas (opcional). */
   images?: string[]
+  /** URL del GIF animado que ilustra el ejercicio (opcional). */
+  gifUrl?: string
 }

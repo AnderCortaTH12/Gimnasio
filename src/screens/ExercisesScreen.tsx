@@ -3,6 +3,7 @@ import { Search, ChevronRight } from 'lucide-react'
 import { EXERCISES_SEED } from '../data/exercisesSeed'
 import { traducirMusculo, traducirEquipo } from '../data/muscles'
 import { useExerciseFilter } from '../hooks/useExerciseFilter'
+import { ExerciseGif } from '../components/ExerciseGif'
 import { PageTitle } from '../components/PageTitle'
 import { ExerciseFilters } from '../components/ExerciseFilters'
 import { Badge, Card, EmptyState } from '../components/ui'
@@ -36,9 +37,12 @@ export function ExercisesScreen() {
                   onClick={() => navigate(`/ejercicios/${ex.id}`)}
                   className="flex items-center gap-3 py-3"
                 >
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-lime/10 text-sm font-black text-lime">
-                    {traducirMusculo(ex.muscleGroup).slice(0, 2).toUpperCase()}
-                  </div>
+                  <ExerciseGif
+                    gifUrl={ex.gifUrl}
+                    name={ex.name}
+                    variant="preview"
+                    className="shrink-0"
+                  />
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-semibold text-text">{ex.name}</p>
                     <div className="mt-1 flex flex-wrap gap-1.5">

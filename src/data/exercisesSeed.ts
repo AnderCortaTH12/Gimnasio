@@ -7,8 +7,13 @@
  */
 
 import type { Exercise } from '../types'
+import { GIF_BASE, GIF_FILES } from './exerciseGifs'
 
-export const EXERCISES_SEED: Exercise[] = [
+/**
+ * Catálogo base (sin GIF). El `gifUrl` se adjunta más abajo asignando en orden
+ * los archivos del dataset (ver `exerciseGifs.ts`).
+ */
+const SEED_BASE: Exercise[] = [
   // ── Pecho ────────────────────────────────────────────────────────────────
   {
     id: 'bench-press',
@@ -539,3 +544,12 @@ export const EXERCISES_SEED: Exercise[] = [
     target: 'forearms',
   },
 ]
+
+/**
+ * Catálogo final: adjunta a cada ejercicio, en orden, un GIF animado del
+ * dataset hasaneyldrm/exercises-dataset (uso personal/no comercial).
+ */
+export const EXERCISES_SEED: Exercise[] = SEED_BASE.map((ex, i) => {
+  const file = GIF_FILES[i]
+  return file ? { ...ex, gifUrl: GIF_BASE + file } : ex
+})
