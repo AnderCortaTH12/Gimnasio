@@ -15,6 +15,7 @@ import {
 } from '../components/ui'
 import { BmiCard } from '../components/body/BmiCard'
 import { MetricCard } from '../components/body/MetricCard'
+import { MetricHistory } from '../components/body/MetricHistory'
 import { MetricChart } from '../components/MetricChart'
 import { EditProfileSheet } from '../components/body/EditProfileSheet'
 import { AddMetricSheet } from '../components/body/AddMetricSheet'
@@ -149,6 +150,9 @@ export function ProfileScreen() {
                   Registra al menos dos pesos para ver la gráfica.
                 </p>
               )}
+              <div className="mt-3">
+                <MetricHistory data={pesos} unit="kg" />
+              </div>
             </Card>
           )}
 

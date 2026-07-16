@@ -258,6 +258,14 @@ export async function ultimaMedida(
   return medidas[medidas.length - 1]
 }
 
+/** Actualiza campos de una medida existente. */
+export async function actualizarMedida(
+  id: string,
+  patch: Partial<Omit<BodyMetric, 'id'>>,
+): Promise<void> {
+  await db.bodyMetrics.update(id, patch)
+}
+
 /** Elimina una medida corporal por id. */
 export async function eliminarMedida(id: string): Promise<void> {
   await db.bodyMetrics.delete(id)

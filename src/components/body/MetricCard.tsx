@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { ChevronDown, Trash2, TrendingUp, TrendingDown, Minus } from 'lucide-react'
+import { ChevronDown, TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import type { BodyMetric, BodyMetricType } from '../../types'
 import { METRIC_META } from '../../data/metrics'
-import { eliminarMedida } from '../../db/db'
 import { Card, StatNumber } from '../ui'
 import { MetricChart } from '../MetricChart'
+import { MetricHistory } from './MetricHistory'
 import { cn } from '../../lib/cn'
 
 interface Props {
@@ -12,13 +12,6 @@ interface Props {
   /** Medidas de este tipo, ordenadas por fecha ascendente. */
   data: BodyMetric[]
 }
-
-const fmtFecha = (iso: string) =>
-  new Date(iso).toLocaleDateString('es-ES', {
-    day: 'numeric',
-    month: 'short',
-    year: '2-digit',
-  })
 
 /** Tarjeta de una medida: valor actual, variación, gráfica e historial. */
 export function MetricCard({ type, data }: Props) {
@@ -74,27 +67,10 @@ export function MetricCard({ type, data }: Props) {
             </p>
           )}
 
-          {/* Historial con opción de borrar */}
-          <ul className="mt-3 flex flex-col gap-1">
-            {[...data].reverse().map((m) => (
-              <li
-                key={m.id}
-                className="flex items-center gap-3 rounded-lg bg-bg px-3 py-2 text-sm"
-              >
-                <span className="flex-1 text-text/50">{fmtFecha(m.date)}</span>
-                <span className="font-bold tabular-nums text-text">
-                  {m.value} {meta.unit}
-                </span>
-                <button
-                  onClick={() => eliminarMedida(m.id)}
-                  aria-label="Eliminar medida"
-                  className="text-text/25 active:scale-90 active:text-regress"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </li>
-            ))}
-          </ul>
+          {/* Historial con opción de editar y borrar */}
+          <div className="mt-3">
+            <MetricHistory data={data} unit={meta.unit} />
+          </div>
         </div>
       )}
     </Card>
