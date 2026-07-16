@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Dumbbell, Flag, Timer, ChevronDown } from 'lucide-react'
+import { Plus, Dumbbell, Flag, Timer, ChevronDown, ClipboardList } from 'lucide-react'
 import { useSessionStore } from '../store/sessionStore'
 import { useRestTimerStore, PRESETS_DESCANSO } from '../store/restTimerStore'
-import { calcularVolumen } from '../db/db'
-import { Button, EmptyState, StatNumber } from '../components/ui'
+import { calcularVolumen, finalizarPlanExecution } from '../db/db'
+import { Button, EmptyState, StatNumber, Toast, type ToastData } from '../components/ui'
 import { ExercisePickerSheet } from '../components/ExercisePickerSheet'
 import { ExerciseEntryCard } from '../components/workout/ExerciseEntryCard'
 import { PRCelebration } from '../components/workout/PRCelebration'
@@ -47,6 +47,7 @@ export function WorkoutScreen() {
   // Evita que el efecto de redirección salte mientras se finaliza (la sesión
   // activa pasa a null antes de que se resuelva la detección de récords).
   const [finalizando, setFinalizando] = useState(false)
+  const [toast, setToast] = useState<ToastData | null>(null)
   const [, setTick] = useState(0)
 
   // Cronómetro de la sesión: refresca cada segundo.
@@ -83,6 +84,11 @@ export function WorkoutScreen() {
     (n, e) => n + e.sets.filter((s) => s.completed).length,
     0,
   )
+  // Progreso del plan: ejercicios con al menos una serie completada.
+  const totalEjercicios = active.exercises.length
+  const ejerciciosHechos = active.exercises.filter((e) =>
+    e.sets.some((s) => s.completed),
+  ).length
 
   /** Marca/desmarca una serie y arranca el descanso si se acaba de completar. */
   const handleToggle = (entryId: string, setId: string) => {
@@ -99,11 +105,31 @@ export function WorkoutScreen() {
       !window.confirm('No has completado ninguna serie. ¿Finalizar igualmente?')
     )
       return
+    // Capturamos datos del plan antes de que `finalizar` limpie la sesión.
+    const planExecId = active.planExecutionId
+    const planName = active.planName
+
     setFinalizando(true)
     const records = await finalizar()
-    // Si hay récords, celebra antes de salir; si no, va directo al historial.
+
+    // Si vino de un plan, pregunta si lo completó y registra el resultado.
+    let completado: boolean | null = null
+    if (planExecId) {
+      completado = window.confirm(`¿Completaste el plan "${planName}"?`)
+      await finalizarPlanExecution(planExecId, completado)
+    }
+
+    // Récords → celebración; si no, historial (con toast si hubo plan).
     if (records.length > 0) {
       setPrs(records)
+    } else if (planExecId) {
+      setToast({
+        tone: 'success',
+        message: completado
+          ? '¡Plan completado! 💪'
+          : 'Plan guardado como no completado',
+      })
+      window.setTimeout(() => navigate('/historial', { replace: true }), 1400)
     } else {
       navigate('/historial', { replace: true })
     }
@@ -122,6 +148,12 @@ export function WorkoutScreen() {
       <header className="mb-4">
         <div className="flex items-start justify-between gap-3">
           <div>
+            {active.planId && (
+              <div className="mb-1.5 inline-flex items-center gap-1.5 rounded-full bg-lime/15 px-2.5 py-1 text-xs font-bold text-lime">
+                <ClipboardList className="h-3.5 w-3.5" />
+                Plan: {active.planName}
+              </div>
+            )}
             <h1 className="text-2xl font-black tracking-tight text-text">
               {active.name}
             </h1>
@@ -149,6 +181,26 @@ export function WorkoutScreen() {
             tone="pr"
           />
         </div>
+
+        {/* Progreso del plan: ejercicios completados */}
+        {active.planId && totalEjercicios > 0 && (
+          <div className="mt-3">
+            <div className="mb-1 flex items-center justify-between text-xs font-semibold text-text/60">
+              <span>Progreso del plan</span>
+              <span className="tabular-nums text-lime">
+                {ejerciciosHechos}/{totalEjercicios} ejercicios
+              </span>
+            </div>
+            <div className="h-2 overflow-hidden rounded-full bg-surface">
+              <div
+                className="h-full rounded-full bg-lime transition-all duration-300"
+                style={{
+                  width: `${(ejerciciosHechos / totalEjercicios) * 100}%`,
+                }}
+              />
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Ajustes de descanso */}
@@ -254,6 +306,8 @@ export function WorkoutScreen() {
           setPicker(false)
         }}
       />
+
+      <Toast toast={toast} onClose={() => setToast(null)} />
     </div>
   )
 }

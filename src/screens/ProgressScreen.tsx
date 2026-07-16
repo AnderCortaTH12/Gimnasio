@@ -14,6 +14,7 @@ import { PageTitle } from '../components/PageTitle'
 import { Card, Badge, StatNumber, SectionHeader, EmptyState } from '../components/ui'
 import { ExerciseProgressCard } from '../components/progress/ExerciseProgressCard'
 import { MuscleDistribution } from '../components/progress/MuscleDistribution'
+import { PlanHistorySection } from '../components/plans/PlanHistorySection'
 import { cn } from '../lib/cn'
 
 interface PRItem {
@@ -155,6 +156,9 @@ export function ProgressScreen() {
       <Card className="mb-6">
         <MuscleDistribution data={reparto} />
       </Card>
+
+      {/* Historial de planes ejecutados */}
+      <PlanHistorySection />
 
       {/* Récords recientes */}
       {prsRecientes.length > 0 && (

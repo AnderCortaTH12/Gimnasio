@@ -13,6 +13,8 @@ import type {
   SetEntry,
   BodyMetric,
   UserProfile,
+  WorkoutPlan,
+  WorkoutPlanExecution,
 } from '../types'
 
 /** Base de datos de FORJA. Una única instancia compartida en toda la app. */
@@ -27,6 +29,10 @@ class ForjaDB extends Dexie {
   profile!: Table<UserProfile, string>
   /** Dataset completo de ejercicios (1.324) cacheado para uso offline. */
   exercisesDataset!: Table<Exercise, string>
+  /** Planes personalizados del usuario (fase 7). */
+  workoutPlans!: Table<WorkoutPlan, string>
+  /** Ejecuciones de planes de entrenamiento (fase 7). */
+  workoutPlanExecutions!: Table<WorkoutPlanExecution, string>
 
   constructor() {
     super('forja')
@@ -42,6 +48,12 @@ class ForjaDB extends Dexie {
     // v2 — tabla para el dataset completo de ejercicios.
     this.version(2).stores({
       exercisesDataset: 'id, name, muscleGroup, equipment',
+    })
+
+    // v3 — planes personalizados y ejecuciones de planes.
+    this.version(3).stores({
+      workoutPlans: 'id, createdBy, createdAt',
+      workoutPlanExecutions: 'id, planId, sessionId, startTime, completed',
     })
   }
 }
@@ -192,6 +204,141 @@ export async function duplicarSesion(
 }
 
 // ---------------------------------------------------------------------------
+// Planes de entrenamiento (personalizados del usuario)
+// ---------------------------------------------------------------------------
+
+/** Crea un plan personalizado y lo persiste. Devuelve el plan con su id. */
+export async function crearPlan(
+  data: Omit<WorkoutPlan, 'id' | 'createdBy' | 'createdAt'>,
+): Promise<WorkoutPlan> {
+  const plan: WorkoutPlan = {
+    ...data,
+    id: nuevoId(),
+    createdBy: 'user',
+    createdAt: Date.now(),
+  }
+  await db.workoutPlans.put(plan)
+  return plan
+}
+
+/** Aplica cambios a un plan personalizado existente. */
+export async function editarPlan(
+  id: string,
+  patch: Partial<Omit<WorkoutPlan, 'id' | 'createdBy' | 'createdAt'>>,
+): Promise<void> {
+  await db.workoutPlans.update(id, patch)
+}
+
+/** Elimina un plan personalizado (no afecta a sesiones ya ejecutadas). */
+export async function eliminarPlan(id: string): Promise<void> {
+  await db.workoutPlans.delete(id)
+}
+
+/** Lee los planes personalizados del usuario, más recientes primero. */
+export async function leerPlanesUsuario(): Promise<WorkoutPlan[]> {
+  const all = await db.workoutPlans.toArray()
+  return all.sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0))
+}
+
+// ---------------------------------------------------------------------------
+// Planes de entrenamiento (ejecuciones)
+// ---------------------------------------------------------------------------
+
+/** Crea y persiste una ejecución de plan (sin terminar, no completada). */
+export async function iniciarPlanExecution(input: {
+  planId: string
+  planName: string
+  planOrigin: 'system' | 'user'
+  sessionId: string
+}): Promise<WorkoutPlanExecution> {
+  const exec: WorkoutPlanExecution = {
+    id: nuevoId(),
+    planId: input.planId,
+    planName: input.planName,
+    planOrigin: input.planOrigin,
+    sessionId: input.sessionId,
+    startTime: Date.now(),
+    completed: false,
+  }
+  await db.workoutPlanExecutions.put(exec)
+  return exec
+}
+
+/** Marca una ejecución de plan como terminada, con el resultado dado. */
+export async function finalizarPlanExecution(
+  id: string,
+  completed: boolean,
+): Promise<void> {
+  await db.workoutPlanExecutions.update(id, {
+    completed,
+    endTime: Date.now(),
+  })
+}
+
+/** Guarda (upsert) una ejecución de plan completa. */
+export async function guardarPlanExecution(
+  exec: WorkoutPlanExecution,
+): Promise<void> {
+  await db.workoutPlanExecutions.put(exec)
+}
+
+/** Elimina una ejecución de plan (p. ej. si se descarta la sesión). */
+export async function eliminarPlanExecution(id: string): Promise<void> {
+  await db.workoutPlanExecutions.delete(id)
+}
+
+/** Lista de planes ejecutados, más recientes primero. */
+export async function leerPlanesEjecutados(): Promise<WorkoutPlanExecution[]> {
+  const all = await db.workoutPlanExecutions.toArray()
+  return all.sort((a, b) => b.startTime - a.startTime)
+}
+
+/** Estadísticas de planes: resumen 7 días y % completados por semana (4 sem). */
+export interface EstadisticasPlanes {
+  /** Planes iniciados en los últimos 7 días. */
+  total7: number
+  /** De esos, cuántos se completaron. */
+  completados7: number
+  /** Porcentaje completado en 7 días (0-100). */
+  porcentaje7: number
+  /** Últimas 4 semanas (más antigua primero) con su % completado. */
+  semanas: { label: string; total: number; completados: number; pct: number }[]
+}
+
+export async function estadisticasPlanes(): Promise<EstadisticasPlanes> {
+  const DIA = 24 * 3600 * 1000
+  const all = await db.workoutPlanExecutions.toArray()
+  const ahora = Date.now()
+
+  const recientes = all.filter((e) => e.startTime >= ahora - 7 * DIA)
+  const completados7 = recientes.filter((e) => e.completed).length
+  const total7 = recientes.length
+
+  // 4 ventanas de 7 días: índice 0 = la más antigua, 3 = la actual.
+  const semanas = [3, 2, 1, 0].map((atras) => {
+    const fin = ahora - atras * 7 * DIA
+    const inicio = fin - 7 * DIA
+    const enSemana = all.filter(
+      (e) => e.startTime >= inicio && e.startTime < fin,
+    )
+    const comp = enSemana.filter((e) => e.completed).length
+    return {
+      label: atras === 0 ? 'Esta' : `-${atras}`,
+      total: enSemana.length,
+      completados: comp,
+      pct: enSemana.length ? Math.round((comp / enSemana.length) * 100) : 0,
+    }
+  })
+
+  return {
+    total7,
+    completados7,
+    porcentaje7: total7 ? Math.round((completados7 / total7) * 100) : 0,
+    semanas,
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Catálogo de ejercicios (cache)
 // ---------------------------------------------------------------------------
 
@@ -309,16 +456,23 @@ export interface BackupData {
   exercises: Exercise[]
   bodyMetrics: BodyMetric[]
   profile: UserProfile[]
+  /** Planes personalizados (opcional: backups antiguos no lo traen). */
+  plans?: WorkoutPlan[]
+  /** Ejecuciones de planes (opcional: backups antiguos no lo traen). */
+  planExecutions?: WorkoutPlanExecution[]
 }
 
 /** Lee todas las tablas y devuelve un objeto de backup serializable. */
 export async function exportarDatos(): Promise<BackupData> {
-  const [sessions, exercises, bodyMetrics, profile] = await Promise.all([
-    db.sessions.toArray(),
-    db.exercises.toArray(),
-    db.bodyMetrics.toArray(),
-    db.profile.toArray(),
-  ])
+  const [sessions, exercises, bodyMetrics, profile, plans, planExecutions] =
+    await Promise.all([
+      db.sessions.toArray(),
+      db.exercises.toArray(),
+      db.bodyMetrics.toArray(),
+      db.profile.toArray(),
+      db.workoutPlans.toArray(),
+      db.workoutPlanExecutions.toArray(),
+    ])
   return {
     app: 'forja',
     version: BACKUP_VERSION,
@@ -327,6 +481,8 @@ export async function exportarDatos(): Promise<BackupData> {
     exercises,
     bodyMetrics,
     profile,
+    plans,
+    planExecutions,
   }
 }
 
@@ -354,22 +510,30 @@ export async function importarDatos(data: BackupData): Promise<void> {
   }
   await db.transaction(
     'rw',
-    db.sessions,
-    db.exercises,
-    db.bodyMetrics,
-    db.profile,
+    [
+      db.sessions,
+      db.exercises,
+      db.bodyMetrics,
+      db.profile,
+      db.workoutPlans,
+      db.workoutPlanExecutions,
+    ],
     async () => {
       await Promise.all([
         db.sessions.clear(),
         db.exercises.clear(),
         db.bodyMetrics.clear(),
         db.profile.clear(),
+        db.workoutPlans.clear(),
+        db.workoutPlanExecutions.clear(),
       ])
       await Promise.all([
         db.sessions.bulkPut(data.sessions),
         db.exercises.bulkPut(data.exercises),
         db.bodyMetrics.bulkPut(data.bodyMetrics),
         db.profile.bulkPut(data.profile),
+        db.workoutPlans.bulkPut(data.plans ?? []),
+        db.workoutPlanExecutions.bulkPut(data.planExecutions ?? []),
       ])
     },
   )

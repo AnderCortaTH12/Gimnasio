@@ -7,7 +7,7 @@
  */
 
 import { create } from 'zustand'
-import type { Exercise, WorkoutSession, SetEntry } from '../types'
+import type { Exercise, WorkoutSession, SetEntry, WorkoutPlan } from '../types'
 import {
   crearSesion,
   duplicarSesion,
@@ -18,8 +18,15 @@ import {
   leerHistorial,
   nuevoId,
   calcularVolumen,
+  iniciarPlanExecution,
+  eliminarPlanExecution,
 } from '../db/db'
+import { obtenerEjercicio } from '../data/catalogRegistry'
 import { detectarPRs, type PRHallado } from '../lib/stats'
+
+/** Series objetivo que se precargan por ejercicio al ejecutar un plan. */
+const SERIES_OBJETIVO = 3
+const REPS_OBJETIVO = 10
 
 interface SessionState {
   /** Sesión en curso, o null si no hay ninguna. */
@@ -32,6 +39,8 @@ interface SessionState {
 
   /** Inicia una nueva sesión y la deja como activa. */
   iniciar: (name?: string) => Promise<void>
+  /** Inicia una sesión precargada desde un plan y registra su ejecución. */
+  iniciarPlan: (plan: WorkoutPlan) => Promise<void>
   /** Duplica una sesión previa como nueva sesión activa (plantilla). */
   duplicar: (origen: WorkoutSession) => Promise<void>
   /**
@@ -88,6 +97,55 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     set({ active: session })
   },
 
+  iniciarPlan: async (plan) => {
+    const now = Date.now()
+    const sessionId = nuevoId()
+
+    // Precarga los ejercicios del plan con sus series/reps objetivo (sin marcar).
+    const exercises = plan.exerciseIds.map((exId, i) => {
+      const ex = obtenerEjercicio(exId)
+      const target = plan.exerciseReps?.[i]
+      const nSets = target?.sets ?? SERIES_OBJETIVO
+      const reps = target?.reps ?? REPS_OBJETIVO
+      return {
+        id: nuevoId(),
+        exerciseId: exId,
+        exerciseName: ex?.name ?? exId,
+        order: i,
+        sets: Array.from({ length: nSets }, (_, k) => ({
+          id: nuevoId(),
+          order: k + 1,
+          reps,
+          weight: 0,
+          type: 'normal' as const,
+          completed: false,
+        })),
+      }
+    })
+
+    // Registra la ejecución del plan (enlaza plan ↔ sesión).
+    const exec = await iniciarPlanExecution({
+      planId: plan.id,
+      planName: plan.name,
+      planOrigin: plan.createdBy,
+      sessionId,
+    })
+
+    const session: WorkoutSession = {
+      id: sessionId,
+      date: new Date(now).toISOString(),
+      startedAt: now,
+      name: plan.name,
+      exercises,
+      status: 'en-progreso',
+      planId: plan.id,
+      planName: plan.name,
+      planExecutionId: exec.id,
+    }
+    await guardarSesion(session)
+    set({ active: session })
+  },
+
   duplicar: async (origen) => {
     const session = await duplicarSesion(origen)
     set({ active: session })
@@ -107,6 +165,10 @@ export const useSessionStore = create<SessionState>((set, get) => ({
   cancelar: async () => {
     const current = get().active
     if (!current) return
+    // Si venía de un plan, descarta también su ejecución (no cuenta).
+    if (current.planExecutionId) {
+      await eliminarPlanExecution(current.planExecutionId)
+    }
     await eliminarSesion(current.id)
     set({ active: null })
   },

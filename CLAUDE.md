@@ -144,12 +144,27 @@ GImnasio/
 > añadió en la **Fase 4**. Cualquier pulido extra se puede hacer en un pase
 > dedicado cuando quieras.
 >
+- **Fase 7 — Planes de entrenamiento** ✅: planes **predefinidos** (Tracción,
+  Empuje, Piernas, Full Body, Brazos en `data/workoutPlans.ts`) y
+  **personalizados** del usuario (crear/editar/eliminar, tabla `workoutPlans`,
+  esquema v3). Tipos en `types/plan.ts` (`WorkoutPlan` con `createdBy` y
+  `exerciseReps` series×reps; `WorkoutPlanExecution`). Motor de sugerencia
+  explicable (`recommendations/planSuggestions.ts`): ordena por descuido
+  muscular (derivado del catálogo) con los personales primero. UI: sección
+  "Planes disponibles" en Hoy (`components/plans/`: `PlanCard`, `PlanForm`,
+  `PlansSection`), ejecución con badge + progreso n/m en `WorkoutScreen`,
+  pregunta "¿Completaste el plan?" al finalizar, e historial de planes en
+  Progreso (`PlanHistorySection`: % completados 4 semanas + lista). DB
+  (`db.ts`): `crearPlan`/`editarPlan`/`eliminarPlan`, `iniciarPlanExecution`/
+  `finalizarPlanExecution`, `leerPlanesEjecutados`, `estadisticasPlanes`.
+  Planes y ejecuciones incluidos en el backup.
+
 > **Animaciones/microinteracciones**: no son una fase aparte (base en Fase 1,
 > confeti/PR en Fase 4).
 
 ## Estado del proyecto
 
-**Todas las fases (0–6) completadas.** La app es funcional de principio a fin:
+**Todas las fases (0–7) completadas.** La app es funcional de principio a fin:
 registro de entrenos, historial, progreso/PRs, perfil/medidas/IMC, motor de
 recomendaciones, backup export/import, PWA instalable/offline y catálogo de
 1.324 ejercicios con GIFs. Todo offline-first sobre IndexedDB.

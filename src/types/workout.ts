@@ -68,4 +68,10 @@ export interface WorkoutSession {
   notes?: string
   /** Volumen total calculado (peso × reps), cacheado para listados. */
   totalVolume?: number
+  /** Si la sesión nació de un plan, su id (WorkoutPlan.id). */
+  planId?: string
+  /** Nombre del plan de origen, cacheado para mostrarlo en la sesión. */
+  planName?: string
+  /** Ejecución de plan asociada (WorkoutPlanExecution.id). */
+  planExecutionId?: string
 }

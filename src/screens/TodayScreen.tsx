@@ -6,6 +6,7 @@ import { leerHistorial, leerPerfil, calcularVolumen } from '../db/db'
 import { generarRecomendaciones } from '../recommendations'
 import { PageTitle } from '../components/PageTitle'
 import { RecommendationCard } from '../components/RecommendationCard'
+import { PlansSection } from '../components/plans/PlansSection'
 import { Button, Card, StatNumber, SectionHeader, Badge } from '../components/ui'
 
 const HOY = new Date().toLocaleDateString('es-ES', {
@@ -119,6 +120,9 @@ export function TodayScreen() {
           </div>
         </div>
       )}
+
+      {/* Planes de entrenamiento (predefinidos + personalizados) */}
+      <PlansSection sessions={historial} />
 
       {/* Último entrenamiento */}
       <SectionHeader
