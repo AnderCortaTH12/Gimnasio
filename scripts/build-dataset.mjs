@@ -4,6 +4,7 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
+import { traducirNombre } from './translate-name.mjs'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const rawPath = join(root, 'public', 'data', 'exercises.raw.json')
@@ -101,7 +102,7 @@ const out = raw.map((e) => {
 
   return {
     id: e.id,
-    name: cap(e.name),
+    name: traducirNombre(e.name),
     category: String(e.body_part).toLowerCase() === 'cardio' ? 'cardio' : 'strength',
     bodyPart: mg,
     equipment: equip(e.equipment),

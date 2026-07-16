@@ -16,6 +16,14 @@ import { contarDataset, guardarDataset, leerDataset } from '../db/db'
 /** URL del dataset servido como asset estático (cacheado por el SW). */
 const DATASET_URL = '/data/exercises.json'
 
+/**
+ * Versión del dataset. Súbela cuando cambie el contenido (p. ej. nombres
+ * traducidos) para forzar el refresco de la caché de IndexedDB en los
+ * dispositivos que ya lo tenían guardado.
+ */
+const DATASET_VERSION = 2
+const VERSION_KEY = 'forja_dataset_v'
+
 /** Normaliza un nombre para deduplicar (sin acentos ni mayúsculas). */
 const norm = (s: string) =>
   s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim()
@@ -46,16 +54,21 @@ export const useCatalogStore = create<CatalogState>((set, get) => ({
   cargar: async () => {
     if (!get().loading && get().datasetOk) return
     try {
-      let dataset = await leerDataset()
+      // Si la versión cacheada es antigua, forzamos volver a descargar.
+      const versionVieja =
+        localStorage.getItem(VERSION_KEY) !== String(DATASET_VERSION)
 
-      // Si aún no está cacheado, lo descargamos y lo guardamos.
+      let dataset = versionVieja ? [] : await leerDataset()
+
+      // Si aún no está cacheado (o cambió de versión), lo descargamos.
       if (dataset.length === 0) {
         const cuenta = await contarDataset()
-        if (cuenta === 0) {
+        if (versionVieja || cuenta === 0) {
           const res = await fetch(DATASET_URL)
           if (res.ok) {
             const json = (await res.json()) as Exercise[]
-            await guardarDataset(json)
+            await guardarDataset(json) // bulkPut: reemplaza por id
+            localStorage.setItem(VERSION_KEY, String(DATASET_VERSION))
             dataset = json
           }
         } else {
