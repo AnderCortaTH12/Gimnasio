@@ -114,11 +114,22 @@ GImnasio/
   ejercicio (selector + métrica peso/1RM/volumen + gráfica), volumen por músculo
   (7d/30d), récords recientes y "grupos a recuperar". Detección de récords al
   finalizar sesión con celebración + confeti (`PRCelebration`).
-- **Fase 5 — Medidas corporales**: registro y evolución de peso/perímetros.
-- **Fase 6 — Perfil y ajustes**: unidades, objetivos, exportar/importar datos.
-- **Fase 7 — Dataset completo**: integrar los 1.324 ejercicios de
-  `hasaneyldrm/exercises-dataset` (uso personal/no comercial), buscador y
-  cacheo en IndexedDB.
+- **Fase 5 — Motor de recomendaciones** (sección 4.4): sugerencias basadas en
+  reglas (equilibrio muscular, progresión de carga, descanso, variación, rutina
+  del día), cada una con su porqué.
+- **Fase 6 — Copia de seguridad, PWA y dataset completo** (secciones 4.5 y 6):
+  exportar/importar JSON, manifest + service worker (instalable/offline) e
+  integrar los **1.324 ejercicios** de `hasaneyldrm/exercises-dataset` (uso
+  personal/no comercial) con cacheo en IndexedDB.
+
+> **Animaciones/microinteracciones**: no son una fase aparte. La base
+> (feedback al pulsar, transiciones de pestaña, pill de la tab activa, hojas
+> inferiores) está desde la **Fase 1**; el confeti/celebración de récords se
+> añadió en la **Fase 4**. Cualquier pulido extra se puede hacer en un pase
+> dedicado cuando quieras.
+>
+> **Catálogo completo de ejercicios**: ahora hay un subconjunto curado de 48
+> embebido (Fases 1–4). Los **1.324** llegan en la **Fase 6**.
 
 ## Notas
 
