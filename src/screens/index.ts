@@ -1,5 +1,7 @@
 export { TodayScreen } from './TodayScreen'
+export { WorkoutScreen } from './WorkoutScreen'
 export { HistoryScreen } from './HistoryScreen'
+export { SessionDetailScreen } from './SessionDetailScreen'
 export { ProgressScreen } from './ProgressScreen'
 export { ExercisesScreen } from './ExercisesScreen'
 export { ExerciseDetailScreen } from './ExerciseDetailScreen'

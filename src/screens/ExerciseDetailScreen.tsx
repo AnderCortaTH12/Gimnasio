@@ -1,16 +1,18 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Dumbbell, Play, Target } from 'lucide-react'
+import { ArrowLeft, Dumbbell, Plus, Target } from 'lucide-react'
 import { EXERCISES_SEED } from '../data/exercisesSeed'
 import {
   traducirMusculo,
   traducirEquipo,
   CATEGORY_ES,
 } from '../data/muscles'
+import { useSessionStore } from '../store/sessionStore'
 import { Badge, Button, Card, EmptyState } from '../components/ui'
 
 export function ExerciseDetailScreen() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { active, addEjercicio } = useSessionStore()
   const ex = EXERCISES_SEED.find((e) => e.id === id)
 
   if (!ex) {
@@ -94,15 +96,22 @@ export function ExerciseDetailScreen() {
         </Card>
       )}
 
-      {/* CTA (aún sin lógica — Fase 2) */}
+      {/* Añadir a la sesión en curso (si la hay) */}
       <Button
         fullWidth
         size="lg"
-        leftIcon={<Play className="h-5 w-5" />}
-        disabled
+        leftIcon={<Plus className="h-5 w-5" />}
+        onClick={() => {
+          if (active) {
+            addEjercicio(ex)
+            navigate('/entrenar')
+          } else {
+            navigate('/')
+          }
+        }}
         className="mt-2"
       >
-        Añadir a la sesión (Fase 2)
+        {active ? 'Añadir a la sesión' : 'Empieza una sesión para añadirlo'}
       </Button>
     </div>
   )

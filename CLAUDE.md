@@ -65,7 +65,11 @@ GImnasio/
    │  │                    #   StatNumber, SectionHeader, EmptyState
    │  ├─ layout/           # AppLayout + BottomTabBar
    │  └─ PageTitle.tsx     # Cabecera grande de pantalla
-   ├─ screens/             # Una pantalla por pestaña + detalle de ejercicio
+   ├─ screens/             # Pantallas: Today, Workout, History, SessionDetail,
+   │                       #   Progress, Exercises, ExerciseDetail, Profile
+   ├─ store/               # Zustand: sessionStore (sesión activa) +
+   │                       #   restTimerStore (descanso)
+   ├─ hooks/               # useExerciseFilter (búsqueda+filtros compartidos)
    ├─ data/
    │  ├─ exercisesSeed.ts  # ~48 ejercicios embebidos
    │  └─ muscles.ts        # Traducción EN→ES y listas de filtros
@@ -92,9 +96,15 @@ GImnasio/
   bar (react-router), sistema de diseño (`components/ui`), seed de ~48
   ejercicios, pantalla Ejercicios con buscador + filtros y detalle. Resto de
   pantallas maquetadas con datos de muestra. Sin persistencia.
-- **Fase 2 — Registro de sesión**: crear sesión, añadir ejercicios y series,
-  temporizador de descanso. Implementar stubs de `db.ts`.
-- **Fase 3 — Historial y detalle**: listado real de sesiones, ver/editar sesión.
+- **Fase 2 — Registro de entrenos** ✅: sesión activa (Zustand + persistencia
+  en IndexedDB en cada mutación), añadir ejercicios (selector reutilizable),
+  registrar/editar/eliminar series (peso, reps, RPE, notas), completar series,
+  temporizador de descanso configurable con pitido + vibración, finalizar
+  sesión, historial real con detalle, y duplicar sesión como plantilla. Todo
+  sobrevive a recargar. `db.ts` implementado (sin stubs).
+- **Fase 3 — Perfil y medidas** (sección 4.2): peso corporal, altura, IMC,
+  evolución. *(Nota: el documento maestro pone perfil/medidas como Fase 3 y
+  progreso como Fase 4.)*
 - **Fase 4 — Progreso y PRs**: detección de récords, gráficas (Recharts),
   volumen por grupo muscular.
 - **Fase 5 — Medidas corporales**: registro y evolución de peso/perímetros.

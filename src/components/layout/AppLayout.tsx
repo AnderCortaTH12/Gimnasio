@@ -1,5 +1,6 @@
 import { Outlet, useLocation } from 'react-router-dom'
 import { BottomTabBar } from './BottomTabBar'
+import { RestTimerBar } from '../RestTimerBar'
 
 /**
  * Contenedor global móvil-first: área de contenido con scroll + tab bar fija.
@@ -16,6 +17,8 @@ export function AppLayout() {
       >
         <Outlet />
       </main>
+      {/* Temporizador de descanso flotante (visible solo cuando corre). */}
+      <RestTimerBar />
       <BottomTabBar />
     </div>
   )

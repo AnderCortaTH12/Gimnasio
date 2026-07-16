@@ -3,14 +3,14 @@
  *
  * Toda la persistencia vive en IndexedDB a través de Dexie. El resto de la app
  * NO debe tocar IndexedDB directamente: importa las funciones de este módulo.
- * En esta fase de andamiaje las funciones son STUBS: definen la firma y el
- * esquema, pero aún no contienen lógica de negocio.
  */
 
 import Dexie, { type Table } from 'dexie'
 import type {
   Exercise,
   WorkoutSession,
+  ExerciseEntry,
+  SetEntry,
   BodyMetric,
   UserProfile,
 } from '../types'
@@ -43,45 +43,189 @@ class ForjaDB extends Dexie {
 export const db = new ForjaDB()
 
 // ---------------------------------------------------------------------------
-// STUBS de las funciones principales. Se implementarán en fases posteriores.
+// Utilidades
 // ---------------------------------------------------------------------------
 
-/** Crea y persiste una nueva sesión de entrenamiento. Devuelve su id. */
-export async function crearSesion(
-  _session: Omit<WorkoutSession, 'id'>,
-): Promise<string> {
-  throw new Error('crearSesion: no implementado (stub)')
+/** Genera un id único. Usa crypto.randomUUID cuando está disponible. */
+export function nuevoId(): string {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return crypto.randomUUID()
+  }
+  return `id-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+}
+
+/** Suma el volumen (peso × reps) de las series completadas de una sesión. */
+export function calcularVolumen(session: WorkoutSession): number {
+  let total = 0
+  for (const ex of session.exercises) {
+    for (const s of ex.sets) {
+      if (s.completed && s.type !== 'calentamiento') {
+        total += s.weight * s.reps
+      }
+    }
+  }
+  return total
+}
+
+// ---------------------------------------------------------------------------
+// Sesiones de entrenamiento
+// ---------------------------------------------------------------------------
+
+/** Crea y persiste una nueva sesión vacía en estado "en-progreso". */
+export async function crearSesion(name?: string): Promise<WorkoutSession> {
+  const now = Date.now()
+  const session: WorkoutSession = {
+    id: nuevoId(),
+    date: new Date(now).toISOString(),
+    startedAt: now,
+    name: name?.trim() || 'Entrenamiento',
+    exercises: [],
+    status: 'en-progreso',
+  }
+  await db.sessions.put(session)
+  return session
+}
+
+/** Guarda (upsert) una sesión completa. Recalcula el volumen cacheado. */
+export async function guardarSesion(session: WorkoutSession): Promise<void> {
+  await db.sessions.put({ ...session, totalVolume: calcularVolumen(session) })
 }
 
 /** Guarda/actualiza una serie dentro de una sesión y ejercicio dados. */
 export async function guardarSerie(
-  _sessionId: string,
-  _exerciseEntryId: string,
-  _set: import('../types').SetEntry,
+  sessionId: string,
+  exerciseEntryId: string,
+  set: SetEntry,
 ): Promise<void> {
-  throw new Error('guardarSerie: no implementado (stub)')
+  const session = await db.sessions.get(sessionId)
+  if (!session) throw new Error(`Sesión ${sessionId} no encontrada`)
+  const entry = session.exercises.find((e) => e.id === exerciseEntryId)
+  if (!entry) throw new Error(`Ejercicio ${exerciseEntryId} no encontrado`)
+  const idx = entry.sets.findIndex((s) => s.id === set.id)
+  if (idx >= 0) entry.sets[idx] = set
+  else entry.sets.push(set)
+  await guardarSesion(session)
 }
 
-/** Lee el historial de sesiones, más recientes primero. */
-export async function leerHistorial(
-  _limit?: number,
-): Promise<WorkoutSession[]> {
-  throw new Error('leerHistorial: no implementado (stub)')
+/** Devuelve la sesión en curso (estado "en-progreso"), o undefined. */
+export async function obtenerSesionActiva(): Promise<
+  WorkoutSession | undefined
+> {
+  return db.sessions.where('status').equals('en-progreso').first()
 }
+
+/** Devuelve una sesión por id. */
+export async function obtenerSesion(
+  id: string,
+): Promise<WorkoutSession | undefined> {
+  return db.sessions.get(id)
+}
+
+/** Marca una sesión como completada, fija fin y volumen final. */
+export async function finalizarSesion(
+  session: WorkoutSession,
+): Promise<void> {
+  const finished: WorkoutSession = {
+    ...session,
+    status: 'completada',
+    finishedAt: Date.now(),
+  }
+  await guardarSesion(finished)
+}
+
+/** Elimina una sesión por id. */
+export async function eliminarSesion(id: string): Promise<void> {
+  await db.sessions.delete(id)
+}
+
+/** Lee el historial de sesiones completadas, más recientes primero. */
+export async function leerHistorial(
+  limit?: number,
+): Promise<WorkoutSession[]> {
+  let coll = db.sessions
+    .where('status')
+    .equals('completada')
+    .reverse()
+    .sortBy('startedAt')
+  const sorted = await coll
+  return typeof limit === 'number' ? sorted.slice(0, limit) : sorted
+}
+
+/**
+ * Duplica una sesión anterior como nueva sesión "en-progreso".
+ * Copia los ejercicios y series como OBJETIVO: mismos pesos/reps pero sin
+ * marcar como completadas y sin PRs.
+ */
+export async function duplicarSesion(
+  origen: WorkoutSession,
+): Promise<WorkoutSession> {
+  const now = Date.now()
+  const exercises: ExerciseEntry[] = origen.exercises.map((ex) => ({
+    ...ex,
+    id: nuevoId(),
+    sets: ex.sets
+      .filter((s) => s.type !== 'calentamiento')
+      .map((s) => ({
+        ...s,
+        id: nuevoId(),
+        completed: false,
+        isPR: false,
+      })),
+  }))
+  const copia: WorkoutSession = {
+    id: nuevoId(),
+    date: new Date(now).toISOString(),
+    startedAt: now,
+    name: origen.name,
+    exercises,
+    status: 'en-progreso',
+  }
+  await db.sessions.put(copia)
+  return copia
+}
+
+// ---------------------------------------------------------------------------
+// Catálogo de ejercicios (cache)
+// ---------------------------------------------------------------------------
+
+/** Cachea el catálogo de ejercicios en IndexedDB (idempotente). */
+export async function cachearEjercicios(items: Exercise[]): Promise<void> {
+  await db.exercises.bulkPut(items)
+}
+
+// ---------------------------------------------------------------------------
+// Perfil de usuario
+// ---------------------------------------------------------------------------
 
 /** Lee el perfil de usuario, o undefined si aún no existe. */
 export async function leerPerfil(): Promise<UserProfile | undefined> {
-  throw new Error('leerPerfil: no implementado (stub)')
+  return db.profile.get('profile')
 }
 
 /** Guarda/actualiza el perfil de usuario. */
-export async function guardarPerfil(_profile: UserProfile): Promise<void> {
-  throw new Error('guardarPerfil: no implementado (stub)')
+export async function guardarPerfil(profile: UserProfile): Promise<void> {
+  await db.profile.put({ ...profile, updatedAt: Date.now() })
 }
+
+// ---------------------------------------------------------------------------
+// Medidas corporales
+// ---------------------------------------------------------------------------
 
 /** Guarda una nueva medida corporal. Devuelve su id. */
 export async function guardarMedida(
-  _metric: Omit<BodyMetric, 'id'>,
+  metric: Omit<BodyMetric, 'id'>,
 ): Promise<string> {
-  throw new Error('guardarMedida: no implementado (stub)')
+  const id = nuevoId()
+  await db.bodyMetrics.put({ ...metric, id })
+  return id
+}
+
+/** Lee las medidas de un tipo dado, ordenadas por fecha ascendente. */
+export async function leerMedidas(
+  type?: BodyMetric['type'],
+): Promise<BodyMetric[]> {
+  const all = type
+    ? await db.bodyMetrics.where('type').equals(type).toArray()
+    : await db.bodyMetrics.toArray()
+  return all.sort((a, b) => a.date.localeCompare(b.date))
 }
