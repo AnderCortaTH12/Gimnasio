@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AppLayout } from './components/layout/AppLayout'
 import { useSessionStore } from './store/sessionStore'
+import { useCatalogStore } from './store/catalogStore'
 import {
   TodayScreen,
   WorkoutScreen,
@@ -20,10 +21,13 @@ import {
  */
 function App() {
   const hidratar = useSessionStore((s) => s.hidratar)
+  const cargarCatalogo = useCatalogStore((s) => s.cargar)
 
   useEffect(() => {
     void hidratar()
-  }, [hidratar])
+    // Carga el dataset completo (de IndexedDB o descarga) para el catálogo.
+    void cargarCatalogo()
+  }, [hidratar, cargarCatalogo])
 
   return (
     <BrowserRouter>

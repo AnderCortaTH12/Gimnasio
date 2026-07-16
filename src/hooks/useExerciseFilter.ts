@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import { EXERCISES_SEED } from '../data/exercisesSeed'
 import type { Exercise, MuscleKey, EquipmentKey } from '../types'
+import { useCatalogStore } from '../store/catalogStore'
 
 /** Normaliza texto para búsqueda insensible a mayúsculas y acentos. */
 export const normalizar = (s: string): string =>
@@ -13,14 +13,16 @@ export const normalizar = (s: string): string =>
  * Lógica compartida de búsqueda + filtros del catálogo de ejercicios.
  * La usan tanto la pantalla Ejercicios como el selector dentro de una sesión.
  */
-export function useExerciseFilter(source: Exercise[] = EXERCISES_SEED) {
+export function useExerciseFilter(source?: Exercise[]) {
+  const catalogo = useCatalogStore((s) => s.exercises)
+  const lista = source ?? catalogo
   const [query, setQuery] = useState('')
   const [muscle, setMuscle] = useState<MuscleKey | null>(null)
   const [equipment, setEquipment] = useState<EquipmentKey | null>(null)
 
   const filtered = useMemo(() => {
     const q = normalizar(query.trim())
-    return source.filter((ex) => {
+    return lista.filter((ex) => {
       if (q && !normalizar(ex.name).includes(q)) return false
       if (
         muscle &&
@@ -32,7 +34,7 @@ export function useExerciseFilter(source: Exercise[] = EXERCISES_SEED) {
       if (equipment && ex.equipment !== equipment) return false
       return true
     })
-  }, [source, query, muscle, equipment])
+  }, [lista, query, muscle, equipment])
 
   const hayFiltros = muscle !== null || equipment !== null || query.trim() !== ''
 

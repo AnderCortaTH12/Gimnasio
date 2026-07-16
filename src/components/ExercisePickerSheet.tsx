@@ -1,7 +1,9 @@
+import { useRef } from 'react'
 import { X, Plus } from 'lucide-react'
 import type { Exercise } from '../types'
 import { traducirMusculo, traducirEquipo } from '../data/muscles'
 import { useExerciseFilter } from '../hooks/useExerciseFilter'
+import { useIncrementalList } from '../hooks/useIncrementalList'
 import { ExerciseFilters } from './ExerciseFilters'
 import { Badge } from './ui'
 
@@ -21,6 +23,12 @@ export function ExercisePickerSheet({
   yaAnadidos = [],
 }: Props) {
   const f = useExerciseFilter()
+  const scrollRef = useRef<HTMLUListElement | null>(null)
+  const { visible, hayMas, sentinelRef } = useIncrementalList(
+    f.filtered,
+    30,
+    scrollRef,
+  )
 
   if (!open) return null
 
@@ -49,8 +57,8 @@ export function ExercisePickerSheet({
           <ExerciseFilters {...f} />
         </div>
 
-        <ul className="flex-1 overflow-y-auto px-4 pb-4 pt-2">
-          {f.filtered.map((ex) => {
+        <ul ref={scrollRef} className="flex-1 overflow-y-auto px-4 pb-4 pt-2">
+          {visible.map((ex) => {
             const added = yaAnadidos.includes(ex.id)
             return (
               <li key={ex.id}>
@@ -80,6 +88,7 @@ export function ExercisePickerSheet({
               </li>
             )
           })}
+          {hayMas && <div ref={sentinelRef} className="h-8" />}
           {f.filtered.length === 0 && (
             <p className="py-10 text-center text-sm text-text/40">
               Sin resultados

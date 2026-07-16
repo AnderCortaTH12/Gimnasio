@@ -129,8 +129,14 @@ GImnasio/
     + `navigateFallback`, runtime caching (fuentes Google + GIFs GitHub
     cache-first), y banner de actualización (`UpdatePrompt` con `useRegisterSW`).
     Iconos generados con `scripts/gen-icons.mjs` (sharp).
-  - **6.3 Dataset completo**: integrar los **1.324 ejercicios** de
-    `hasaneyldrm/exercises-dataset` con cacheo en IndexedDB.
+  - **6.3 Dataset completo** ✅: **1.324 ejercicios** de
+    `hasaneyldrm/exercises-dataset` adelgazados con `scripts/build-dataset.mjs`
+    (17 MB → 1.1 MB, español, GIF real por id) en `public/data/exercises.json`.
+    Se cachean en IndexedDB (tabla `exercisesDataset`, esquema v2) y se precachean
+    en el SW. Catálogo en memoria (`catalogStore`) = dataset + seed (deduplicado
+    por nombre) → búsqueda/filtros instantáneos. Registro id→ejercicio
+    (`catalogRegistry`) para stats. Listas con renderizado incremental
+    (`useIncrementalList`, IntersectionObserver) en catálogo y selector.
 
 > **Animaciones/microinteracciones**: no son una fase aparte. La base
 > (feedback al pulsar, transiciones de pestaña, pill de la tab activa, hojas
@@ -138,12 +144,71 @@ GImnasio/
 > añadió en la **Fase 4**. Cualquier pulido extra se puede hacer en un pase
 > dedicado cuando quieras.
 >
-> **Catálogo completo de ejercicios**: ahora hay un subconjunto curado de 48
-> embebido (Fases 1–4). Los **1.324** llegan en la **Fase 6**.
+> **Animaciones/microinteracciones**: no son una fase aparte (base en Fase 1,
+> confeti/PR en Fase 4).
+
+## Estado del proyecto
+
+**Todas las fases (0–6) completadas.** La app es funcional de principio a fin:
+registro de entrenos, historial, progreso/PRs, perfil/medidas/IMC, motor de
+recomendaciones, backup export/import, PWA instalable/offline y catálogo de
+1.324 ejercicios con GIFs. Todo offline-first sobre IndexedDB.
+
+## Instalación y uso
+
+Requisitos: Node 18+ (probado con Node 24) y npm.
+
+```bash
+npm install          # instala dependencias
+npm run dev          # desarrollo en http://localhost:5173 (SIN service worker)
+npm run build        # build de producción a dist/
+npm run preview      # sirve dist/ en http://localhost:4173 (CON PWA/offline)
+npm run lint         # typecheck (tsc --noEmit)
+```
+
+- **La PWA (instalable + offline) solo funciona en `build` + `preview`**, no en
+  `dev`. Para instalarla: abre el preview en Chrome → icono "Instalar" en la
+  barra de direcciones → se abre como app en ventana propia.
+- **Móvil-first**: para verla bien en escritorio, usa la vista responsive del
+  navegador (~390px).
+- **Datos**: viven solo en el dispositivo (IndexedDB). Exporta desde
+  Perfil → Copia de seguridad para no perderlos.
+
+### Scripts de datos (regenerar dataset/iconos)
+
+```bash
+# Iconos PWA (public/icons/) — requiere sharp (devDependency)
+node scripts/gen-icons.mjs
+
+# Dataset de ejercicios: descarga el crudo y adelgázalo
+#   1) descarga data/exercises.json del repo a public/data/exercises.raw.json
+#   2) node scripts/build-dataset.mjs  → public/data/exercises.json (1.1 MB)
+```
+
+## Estructura relevante
+
+```
+public/
+  data/exercises.json    # dataset adelgazado (1.324, servido como asset)
+  icons/                 # iconos PWA (192, 512, maskable)
+src/
+  screens/               # una pantalla por pestaña + detalles
+  components/            # ui/ (sistema de diseño), body/, workout/, progress/…
+  store/                 # zustand: session, catalog, restTimer
+  db/db.ts               # capa Dexie (única puerta a IndexedDB)
+  lib/                   # stats, imc, cn
+  recommendations/       # motor de reglas (rules.ts + engine.ts)
+  data/                  # seed, dataset registry, traducciones, gifs
+scripts/                 # gen-icons, build-dataset
+```
 
 ## Notas
 
-- El documento `PROMPT_MAESTRO_GymTracker.md` (especificación completa) es la
-  fuente de verdad, pero **no está presente** en la carpeta a fecha del
-  andamiaje. Reincorporarlo cuando esté disponible y revisar que los tipos y el
-  esquema encajan con sus secciones 4 y 5.
+- El seed de 49 ejercicios (`data/exercisesSeed.ts`) queda como **respaldo**: se
+  usa si el dataset no carga (p. ej. offline en el primer arranque) y se une al
+  dataset deduplicado por nombre.
+- El dataset trae el nombre del GIF por ejercicio (`gif_url`/`media_id`), así que
+  cada ejercicio muestra su animación correcta. Los GIFs se sirven de GitHub raw
+  y el SW los cachea al verlos (cache-first).
+- Créditos del dataset: `hasaneyldrm/exercises-dataset` (uso personal/no
+  comercial); GIFs © Gym Visual.

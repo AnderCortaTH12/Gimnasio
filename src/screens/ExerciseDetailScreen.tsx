@@ -1,12 +1,12 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Dumbbell, Plus, Target } from 'lucide-react'
-import { EXERCISES_SEED } from '../data/exercisesSeed'
 import {
   traducirMusculo,
   traducirEquipo,
   CATEGORY_ES,
 } from '../data/muscles'
 import { useSessionStore } from '../store/sessionStore'
+import { useCatalogStore } from '../store/catalogStore'
 import { ExerciseGif } from '../components/ExerciseGif'
 import { Badge, Button, Card, EmptyState } from '../components/ui'
 
@@ -14,7 +14,14 @@ export function ExerciseDetailScreen() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { active, addEjercicio } = useSessionStore()
-  const ex = EXERCISES_SEED.find((e) => e.id === id)
+  const exercises = useCatalogStore((s) => s.exercises)
+  const loading = useCatalogStore((s) => s.loading)
+  const ex = exercises.find((e) => e.id === id)
+
+  // Mientras carga el catálogo, no declaramos "no encontrado" todavía.
+  if (!ex && loading) {
+    return <p className="py-10 text-center text-sm text-text/40">Cargando…</p>
+  }
 
   if (!ex) {
     return (

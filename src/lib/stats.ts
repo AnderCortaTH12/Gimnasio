@@ -6,10 +6,7 @@
  */
 
 import type { WorkoutSession, ExerciseEntry, MuscleKey } from '../types'
-import { EXERCISES_SEED } from '../data/exercisesSeed'
-
-/** Índice del catálogo por id, para resolver el grupo muscular. */
-const EX_BY_ID = new Map(EXERCISES_SEED.map((e) => [e.id, e]))
+import { obtenerEjercicio } from '../data/catalogRegistry'
 
 /** 1RM estimado con la fórmula de Epley. */
 export function epley1RM(weight: number, reps: number): number {
@@ -29,7 +26,7 @@ export function volumenEjercicio(entry: ExerciseEntry): number {
 
 /** Grupo muscular principal de un ejercicio del catálogo. */
 export function musculoDeEjercicio(exerciseId: string): MuscleKey | undefined {
-  return EX_BY_ID.get(exerciseId)?.muscleGroup
+  return obtenerEjercicio(exerciseId)?.muscleGroup
 }
 
 // ---------------------------------------------------------------------------

@@ -19,12 +19,14 @@ import type {
 class ForjaDB extends Dexie {
   /** Sesiones de entrenamiento (con sus ejercicios y series anidados). */
   sessions!: Table<WorkoutSession, string>
-  /** Catálogo de ejercicios cacheado desde el dataset. */
+  /** Catálogo de ejercicios cacheado desde el dataset (legado, no usado). */
   exercises!: Table<Exercise, string>
   /** Medidas corporales (peso, grasa, perímetros...). */
   bodyMetrics!: Table<BodyMetric, string>
   /** Perfil de usuario (registro único con id 'profile'). */
   profile!: Table<UserProfile, string>
+  /** Dataset completo de ejercicios (1.324) cacheado para uso offline. */
+  exercisesDataset!: Table<Exercise, string>
 
   constructor() {
     super('forja')
@@ -35,6 +37,11 @@ class ForjaDB extends Dexie {
       exercises: 'id, name, category, equipment',
       bodyMetrics: 'id, date, type',
       profile: 'id',
+    })
+
+    // v2 — tabla para el dataset completo de ejercicios.
+    this.version(2).stores({
+      exercisesDataset: 'id, name, muscleGroup, equipment',
     })
   }
 }
@@ -191,6 +198,21 @@ export async function duplicarSesion(
 /** Cachea el catálogo de ejercicios en IndexedDB (idempotente). */
 export async function cachearEjercicios(items: Exercise[]): Promise<void> {
   await db.exercises.bulkPut(items)
+}
+
+/** Nº de ejercicios del dataset cacheados en IndexedDB. */
+export async function contarDataset(): Promise<number> {
+  return db.exercisesDataset.count()
+}
+
+/** Guarda el dataset completo de ejercicios en IndexedDB. */
+export async function guardarDataset(items: Exercise[]): Promise<void> {
+  await db.exercisesDataset.bulkPut(items)
+}
+
+/** Lee el dataset completo de ejercicios desde IndexedDB. */
+export async function leerDataset(): Promise<Exercise[]> {
+  return db.exercisesDataset.toArray()
 }
 
 // ---------------------------------------------------------------------------

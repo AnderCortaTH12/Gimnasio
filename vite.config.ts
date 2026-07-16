@@ -38,8 +38,10 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // Precachea todo el bundle estático (HTML, JS, CSS, iconos).
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+        // Precachea el bundle estático + el dataset de ejercicios (JSON).
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2,json}'],
+        // El dataset ronda 1 MB; subimos el límite de precache.
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         // SPA: cualquier navegación offline cae en index.html.
         navigateFallback: '/index.html',
         runtimeCaching: [
