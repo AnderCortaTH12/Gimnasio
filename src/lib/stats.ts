@@ -78,9 +78,10 @@ export interface EjercicioEntrenado {
   id: string
   name: string
   sesiones: number
+  ultimmaSesion?: string
 }
 
-/** Lista de ejercicios con historial, ordenados por nº de sesiones. */
+/** Lista de ejercicios con historial, ordenados por más recientes primero. */
 export function ejerciciosEntrenados(
   sessions: WorkoutSession[],
 ): EjercicioEntrenado[] {
@@ -89,16 +90,21 @@ export function ejerciciosEntrenados(
     for (const e of s.exercises) {
       if (seriesEfectivas(e).length === 0) continue
       const prev = map.get(e.exerciseId)
-      if (prev) prev.sesiones += 1
-      else
+      if (prev) {
+        prev.sesiones += 1
+        prev.ultimmaSesion = s.date
+      } else
         map.set(e.exerciseId, {
           id: e.exerciseId,
           name: e.exerciseName,
           sesiones: 1,
+          ultimmaSesion: s.date,
         })
     }
   }
-  return [...map.values()].sort((a, b) => b.sesiones - a.sesiones)
+  return [...map.values()].sort(
+    (a, b) => (b.ultimmaSesion ?? '').localeCompare(a.ultimmaSesion ?? ''),
+  )
 }
 
 // ---------------------------------------------------------------------------

@@ -102,26 +102,26 @@ export function ProgressScreen() {
             Últimos 7 días
           </div>
           <div className="grid grid-cols-3 gap-2">
-            <StatNumber value={semana.entrenos} label="Entrenos" tone="lime" />
+            <StatNumber value={semana.entrenos} label="Entrenamientos" tone="lime" />
             <StatNumber
               value={(semana.volumen / 1000).toFixed(1)}
               unit="t"
-              label="Volumen"
+              label={`Volumen = ${semana.volumen.toFixed(0)} kg`}
             />
-            <StatNumber value={semana.series} label="Series" />
+            <StatNumber value={semana.series} label="Series realizadas" />
           </div>
         </Card>
         <Card className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-lime/10">
             <Flame className="h-6 w-6 text-lime" />
           </div>
-          <StatNumber value={racha} unit="sem" label="Racha" tone="lime" />
+          <StatNumber value={racha} unit="sem" label="Racha actual" tone="lime" />
         </Card>
         <Card className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-pr/10">
             <Trophy className="h-6 w-6 text-pr" />
           </div>
-          <StatNumber value={semana.prs} label="PRs (7d)" tone="pr" />
+          <StatNumber value={semana.prs} label="Récords nuevos (7d)" tone="pr" />
         </Card>
       </div>
 

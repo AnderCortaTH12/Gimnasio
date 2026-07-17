@@ -7,7 +7,6 @@
  */
 
 import type { Exercise } from '../types'
-import { GIF_BASE, GIF_FILES } from './exerciseGifs'
 
 /**
  * Catálogo base (sin GIF). El `gifUrl` se adjunta más abajo asignando en orden
@@ -546,10 +545,10 @@ const SEED_BASE: Exercise[] = [
 ]
 
 /**
- * Catálogo final: adjunta a cada ejercicio, en orden, un GIF animado del
- * dataset hasaneyldrm/exercises-dataset (uso personal/no comercial).
+ * Catálogo final: sin GIFs asignados por índice.
+ *
+ * Los GIFs correctos vienen del dataset (por id), no se asignan por orden.
+ * El seed de 49 ejercicios sirve como respaldo si el dataset no carga.
+ * Cualquier ejercicio del seed que esté en el dataset usa el GIF del dataset.
  */
-export const EXERCISES_SEED: Exercise[] = SEED_BASE.map((ex, i) => {
-  const file = GIF_FILES[i]
-  return file ? { ...ex, gifUrl: GIF_BASE + file } : ex
-})
+export const EXERCISES_SEED: Exercise[] = SEED_BASE

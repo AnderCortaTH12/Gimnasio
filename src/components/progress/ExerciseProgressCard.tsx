@@ -8,7 +8,7 @@ import {
   Tooltip,
   CartesianGrid,
 } from 'recharts'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Info } from 'lucide-react'
 import type { WorkoutSession } from '../../types'
 import {
   ejerciciosEntrenados,
@@ -20,10 +20,31 @@ import { cn } from '../../lib/cn'
 
 type Metric = 'maxWeight' | 'est1RM' | 'volume'
 
-const METRICAS: Array<{ id: Metric; label: string; unit: string }> = [
-  { id: 'maxWeight', label: 'Peso máx.', unit: 'kg' },
-  { id: 'est1RM', label: '1RM est.', unit: 'kg' },
-  { id: 'volume', label: 'Volumen', unit: 'kg' },
+const METRICAS: Array<{
+  id: Metric
+  label: string
+  unit: string
+  description: string
+}> = [
+  {
+    id: 'maxWeight',
+    label: 'Peso máx.',
+    unit: 'kg',
+    description: 'El peso más pesado que has levantado en este ejercicio.',
+  },
+  {
+    id: 'est1RM',
+    label: '1RM est.',
+    unit: 'kg',
+    description:
+      'Tu fuerza máxima teórica para 1 repetición, estimada con la fórmula de Epley.',
+  },
+  {
+    id: 'volume',
+    label: 'Volumen',
+    unit: 'kg',
+    description: 'Kg totales movidos = peso × repeticiones × series, sumado.',
+  },
 ]
 
 interface Props {
@@ -36,6 +57,7 @@ export function ExerciseProgressCard({ sessions }: Props) {
   const [exId, setExId] = useState<string>(entrenados[0]?.id ?? '')
   const [metric, setMetric] = useState<Metric>('maxWeight')
   const [abrirSelector, setAbrirSelector] = useState(false)
+  const [showMetricInfo, setShowMetricInfo] = useState<Metric | null>(null)
 
   // Si el ejercicio elegido desaparece, usa el primero disponible.
   const seleccionado = entrenados.find((e) => e.id === exId) ?? entrenados[0]
@@ -116,21 +138,38 @@ export function ExerciseProgressCard({ sessions }: Props) {
       </div>
 
       {/* Selector de métrica */}
-      <div className="mb-4 flex gap-1.5">
-        {METRICAS.map((m) => (
-          <button
-            key={m.id}
-            onClick={() => setMetric(m.id)}
-            className={cn(
-              'flex-1 rounded-lg border py-1.5 text-xs font-semibold transition-all active:scale-95',
-              metric === m.id
-                ? 'border-lime bg-lime text-bg'
-                : 'border-border bg-bg text-text/60',
-            )}
-          >
-            {m.label}
-          </button>
-        ))}
+      <div className="mb-4 flex flex-col gap-2">
+        <div className="flex gap-1.5">
+          {METRICAS.map((m) => (
+            <div key={m.id} className="relative flex-1">
+              <button
+                onClick={() => setMetric(m.id)}
+                className={cn(
+                  'w-full rounded-lg border py-1.5 text-xs font-semibold transition-all active:scale-95',
+                  metric === m.id
+                    ? 'border-lime bg-lime text-bg'
+                    : 'border-border bg-bg text-text/60',
+                )}
+              >
+                {m.label}
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setShowMetricInfo(showMetricInfo === m.id ? null : m.id)
+                }}
+                className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-text/20 text-text/50 hover:bg-text/30 active:scale-90"
+              >
+                <Info className="h-3 w-3" />
+              </button>
+            </div>
+          ))}
+        </div>
+        {showMetricInfo && (
+          <p className="text-xs leading-relaxed text-text/60">
+            {METRICAS.find((m) => m.id === showMetricInfo)?.description}
+          </p>
+        )}
       </div>
 
       {puntos.length < 2 ? (
