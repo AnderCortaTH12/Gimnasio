@@ -109,6 +109,7 @@ export function WorkoutDeckScreen() {
     if (currentExerciseIdx < active.exercises.length - 1) {
       setCurrentExerciseIdx(currentExerciseIdx + 1)
       setShowRestTimer(false)
+      restTimer.stop()
     } else {
       // Última serie del último ejercicio
       handleFinalize()
@@ -197,7 +198,7 @@ export function WorkoutDeckScreen() {
       {/* Contenido principal */}
       <div className="flex-1 overflow-hidden flex flex-col items-center justify-center py-2">
         <AnimatePresence mode="wait">
-          {showRestTimer && restTimer.endsAt !== null ? (
+          {restTimer.endsAt !== null ? (
             <motion.div
               key="rest"
               initial={{ opacity: 0, y: 20 }}
