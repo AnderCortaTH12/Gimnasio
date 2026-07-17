@@ -182,6 +182,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
           id: nuevoId(),
           exerciseId: ex.id,
           exerciseName: ex.name,
+          gifUrl: ex.gifUrl,
           order: s.exercises.length,
           sets: [
             {

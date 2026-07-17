@@ -36,6 +36,8 @@ export interface ExerciseEntry {
   exerciseId: string
   /** Nombre cacheado del ejercicio (para no depender del catálogo al leer). */
   exerciseName: string
+  /** URL del GIF cacheado al momento de añadir el ejercicio. */
+  gifUrl?: string
   /** Orden del ejercicio dentro de la sesión. */
   order: number
   /** Series registradas. */

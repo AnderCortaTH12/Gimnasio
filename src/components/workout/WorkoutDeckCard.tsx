@@ -28,6 +28,8 @@ export function WorkoutDeckCard({
   const currentSet = entry.sets[currentSetIndex]
   const totalSets = entry.sets.length
   const completedSets = entry.sets.filter((s) => s.completed).length
+  // Intenta usar gifUrl cacheado; fallback: resuelve desde catálogo (sesiones antiguas)
+  const gifUrl = entry.gifUrl || obtenerEjercicio(entry.exerciseId)?.gifUrl
   const ejercicio = obtenerEjercicio(entry.exerciseId)
 
   // Precargar con la serie anterior o valores por defecto
@@ -82,7 +84,7 @@ export function WorkoutDeckCard({
           <div className="flex justify-center">
             <div className="h-32 w-32">
               <ExerciseGif
-                gifUrl={ejercicio?.gifUrl}
+                gifUrl={gifUrl}
                 name={entry.exerciseName}
                 variant="preview"
               />
@@ -125,7 +127,7 @@ export function WorkoutDeckCard({
                   type="number"
                   value={weight || ''}
                   onChange={(e) => setWeight(parseFloat(e.target.value) || 0)}
-                  className="flex-1 rounded-lg border border-border bg-bg px-3 py-2.5 text-center text-2xl font-extrabold text-text focus:border-lime/50 focus:outline-none"
+                  className="min-w-0 flex-1 rounded-lg border border-border bg-bg px-3 py-2.5 text-center text-xl font-extrabold text-text focus:border-lime/50 focus:outline-none"
                   placeholder="0"
                 />
                 <button
@@ -154,7 +156,7 @@ export function WorkoutDeckCard({
                   type="number"
                   value={reps || ''}
                   onChange={(e) => setReps(parseInt(e.target.value) || 0)}
-                  className="flex-1 rounded-lg border border-border bg-bg px-3 py-2.5 text-center text-2xl font-extrabold text-text focus:border-lime/50 focus:outline-none"
+                  className="min-w-0 flex-1 rounded-lg border border-border bg-bg px-3 py-2.5 text-center text-xl font-extrabold text-text focus:border-lime/50 focus:outline-none"
                   placeholder="0"
                 />
                 <button
