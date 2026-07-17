@@ -24,6 +24,7 @@ export function WorkoutDeckCard({
   const [weight, setWeight] = useState<number>(0)
   const [reps, setReps] = useState<number>(0)
   const [rpe, setRpe] = useState<number>(7)
+  const [showRPE, setShowRPE] = useState(false)
 
   const currentSet = entry.sets[currentSetIndex]
   const totalSets = entry.sets.length
@@ -62,7 +63,7 @@ export function WorkoutDeckCard({
         onComplete={handleComplete}
         onUndo={handleUndo}
       >
-        <Card className="relative mx-4 flex flex-col gap-6 p-6 md:mx-auto md:max-w-md">
+        <Card className="relative mx-4 flex max-h-[580px] flex-col gap-4 overflow-y-auto p-4 md:mx-auto md:max-w-md">
           {/* Cabecera con nombre y botón de ayuda */}
           <div className="flex items-start justify-between">
             <div>
@@ -82,7 +83,7 @@ export function WorkoutDeckCard({
 
           {/* Miniatura del GIF */}
           <div className="flex justify-center">
-            <div className="h-32 w-32">
+            <div className="h-24 w-24">
               <ExerciseGif
                 gifUrl={gifUrl}
                 name={entry.exerciseName}
@@ -170,24 +171,34 @@ export function WorkoutDeckCard({
             </div>
           </div>
 
-          {/* RPE */}
+          {/* RPE (colapsable) */}
           <div className="flex flex-col">
-            <label className="mb-2 text-xs font-bold uppercase text-text/50">
-              RPE (Esfuerzo 1-10)
+            <label className="mb-2 flex items-center gap-2 text-xs font-bold uppercase text-text/50">
+              <input
+                type="checkbox"
+                checked={showRPE}
+                onChange={(e) => setShowRPE(e.target.checked)}
+                className="h-4 w-4 rounded accent-lime"
+              />
+              <span>RPE (Esfuerzo)</span>
             </label>
-            <input
-              type="range"
-              min="1"
-              max="10"
-              value={rpe}
-              onChange={(e) => setRpe(parseInt(e.target.value))}
-              className="w-full"
-            />
-            <div className="mt-2 flex items-center justify-between">
-              <span className="text-xs text-text/50">Fácil</span>
-              <StatNumber value={rpe} tone="lime" className="text-center" />
-              <span className="text-xs text-text/50">Máximo</span>
-            </div>
+            {showRPE && (
+              <>
+                <input
+                  type="range"
+                  min="1"
+                  max="10"
+                  value={rpe}
+                  onChange={(e) => setRpe(parseInt(e.target.value))}
+                  className="w-full"
+                />
+                <div className="mt-2 flex items-center justify-between">
+                  <span className="text-xs text-text/50">1</span>
+                  <StatNumber value={rpe} tone="lime" className="text-center" />
+                  <span className="text-xs text-text/50">10</span>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Instrucciones: deslizar o botones */}
@@ -217,7 +228,7 @@ export function WorkoutDeckCard({
       {showHelp && (
         <ExerciseHelpModal
           exerciseName={entry.exerciseName}
-          gifUrl={ejercicio?.gifUrl}
+          gifUrl={gifUrl}
           instructions={ejercicio?.instructions}
           onClose={() => setShowHelp(false)}
         />

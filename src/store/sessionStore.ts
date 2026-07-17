@@ -22,6 +22,7 @@ import {
   eliminarPlanExecution,
 } from '../db/db'
 import { obtenerEjercicio } from '../data/catalogRegistry'
+import { obtenerIdDataset } from '../data/seedToDatasetMap'
 import { detectarPRs, type PRHallado } from '../lib/stats'
 
 /** Series objetivo que se precargan por ejercicio al ejecutar un plan. */
@@ -174,29 +175,36 @@ export const useSessionStore = create<SessionState>((set, get) => ({
   },
 
   addEjercicio: (ex) =>
-    mutate(set, get, (s) => ({
-      ...s,
-      exercises: [
-        ...s.exercises,
-        {
-          id: nuevoId(),
-          exerciseId: ex.id,
-          exerciseName: ex.name,
-          gifUrl: ex.gifUrl,
-          order: s.exercises.length,
-          sets: [
-            {
-              id: nuevoId(),
-              order: 1,
-              reps: 0,
-              weight: 0,
-              type: 'normal',
-              completed: false,
-            },
-          ],
-        },
-      ],
-    })),
+    mutate(set, get, (s) => {
+      // Si el ejercicio es del seed, intenta usar el ID del dataset para el GIF correcto
+      const datasetId = obtenerIdDataset(ex.name)
+      const ejercicioReal = datasetId ? obtenerEjercicio(datasetId) : ex
+      const gifUrlReal = ejercicioReal?.gifUrl || ex.gifUrl
+
+      return {
+        ...s,
+        exercises: [
+          ...s.exercises,
+          {
+            id: nuevoId(),
+            exerciseId: ex.id,
+            exerciseName: ex.name,
+            gifUrl: gifUrlReal,
+            order: s.exercises.length,
+            sets: [
+              {
+                id: nuevoId(),
+                order: 1,
+                reps: 0,
+                weight: 0,
+                type: 'normal',
+                completed: false,
+              },
+            ],
+          },
+        ],
+      }
+    }),
 
   removeEjercicio: (entryId) =>
     mutate(set, get, (s) => ({

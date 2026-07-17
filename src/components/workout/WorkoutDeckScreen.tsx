@@ -150,7 +150,7 @@ export function WorkoutDeckScreen() {
   }
 
   return (
-    <div className="flex h-screen flex-col bg-bg">
+    <div className="flex min-h-dvh flex-col bg-bg">
       {/* Cabecera */}
       <div className="border-b border-border bg-surface/50 px-4 py-3 backdrop-blur-sm">
         <div className="flex items-center justify-between">
@@ -195,7 +195,7 @@ export function WorkoutDeckScreen() {
       </div>
 
       {/* Contenido principal */}
-      <div className="flex-1 overflow-y-auto flex flex-col items-center justify-center py-4">
+      <div className="flex-1 overflow-hidden flex flex-col items-center justify-center py-2">
         <AnimatePresence mode="wait">
           {showRestTimer && restTimer.endsAt !== null ? (
             <motion.div
@@ -305,8 +305,8 @@ export function WorkoutDeckScreen() {
         </AnimatePresence>
       </div>
 
-      {/* Botones flotantes: añadir ejercicio / cambiar */}
-      <div className="border-t border-border bg-surface/50 backdrop-blur-sm p-3">
+      {/* Footer con navegación */}
+      <div className="border-t border-border bg-surface/50 backdrop-blur-sm px-3 py-2">
         <div className="flex gap-2">
           <Button
             fullWidth
@@ -317,6 +317,23 @@ export function WorkoutDeckScreen() {
           >
             Cambiar / Añadir
           </Button>
+          {currentExerciseIdx > 0 && (
+            <Button
+              variant="secondary"
+              onClick={() => setCurrentExerciseIdx(currentExerciseIdx - 1)}
+              size="sm"
+            >
+              ←
+            </Button>
+          )}
+          {currentExerciseIdx < active.exercises.length - 1 && (
+            <Button
+              onClick={() => setCurrentExerciseIdx(currentExerciseIdx + 1)}
+              size="sm"
+            >
+              →
+            </Button>
+          )}
         </div>
       </div>
 
