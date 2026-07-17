@@ -36,7 +36,6 @@ export function WorkoutDeckScreen() {
 
   const [currentExerciseIdx, setCurrentExerciseIdx] = useState(0)
   const [pickerOpen, setPickerOpen] = useState(false)
-  const [showRestTimer, setShowRestTimer] = useState(false)
   const [prs, setPrs] = useState<PRHallado[] | null>(null)
   const [finalizando, setFinalizando] = useState(false)
   const [toast, setToast] = useState<ToastData | null>(null)
@@ -49,13 +48,6 @@ export function WorkoutDeckScreen() {
     const id = window.setInterval(() => setTick((t) => t + 1), 1000)
     return () => window.clearInterval(id)
   }, [])
-
-  // Mostrar temporizador al completar una serie
-  useEffect(() => {
-    if (restTimer.endsAt !== null) {
-      setShowRestTimer(true)
-    }
-  }, [restTimer.endsAt])
 
   // Si no hay sesión y está hidratado, volver a Hoy
   useEffect(() => {
@@ -108,7 +100,6 @@ export function WorkoutDeckScreen() {
   const handleNextExercise = async () => {
     if (currentExerciseIdx < active.exercises.length - 1) {
       setCurrentExerciseIdx(currentExerciseIdx + 1)
-      setShowRestTimer(false)
       restTimer.stop()
     } else {
       // Última serie del último ejercicio
@@ -216,10 +207,7 @@ export function WorkoutDeckScreen() {
                   <Button
                     fullWidth
                     variant="secondary"
-                    onClick={() => {
-                      restTimer.stop()
-                      setShowRestTimer(false)
-                    }}
+                    onClick={() => restTimer.stop()}
                     className="text-sm"
                   >
                     Saltar
