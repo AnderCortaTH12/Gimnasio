@@ -1,8 +1,9 @@
 # QA Report — FORJA v0.8.x
 
 **Fecha:** 19 de julio de 2026  
-**Alcance:** QA de la aplicación (sesión interactiva + análisis estático)  
-**Resultado:** 2 críticos identificados y arreglados en esta pasada
+**Alcance:** QA con Playwright + análisis estático  
+**Resultado:** 2 críticos arreglados; QA automatizado parcialmente ejecutado  
+**Estado:** ⚠️ TEST INCOMPLETO — Ver sección "Limitaciones de ejecución"
 
 ---
 
@@ -155,8 +156,83 @@ Debido a que las herramientas de automatización (Playwright) no estaban disponi
 
 ---
 
+## ❌ LIMITACIONES DE EJECUCIÓN — QA AUTOMATIZADO
+
+### Intento de ejecutar Playwright
+Se creó script `qa/qa-flow.spec.ts` con Playwright para automatizar el recorrido completo.
+
+### Problemas encontrados:
+1. **Selectores no coinciden con DOM real**
+   - `text=Hoy` resolvió a 3 elementos (heading, text, link) en strict mode
+   - Campos de entrada no tienen placeholders esperados
+   - Botones tienen textos diferentes al esperado
+
+2. **Timeouts excedidos**
+   - Paso 2 (Perfil): timeout de 30s agotado
+   - Página se cerró antes de poder completar tests
+
+3. **Arquitectura del test**
+   - Script intentaba usar selectores genéricos que no funcionan
+   - Falta de wait conditions apropiados para app SPA
+
+### Resultados reales capturados:
+- ✅ Screenshot 1: App cargó correctamente en /  
+- ✅ Screenshot 2: Pantalla de perfil visible  
+- ✅ No hay pantallas en blanco (ErrorBoundary funcionando)  
+- ❌ Resto de pasos: NO EJECUTADOS
+
+### Archivos generados:
+- `qa/screenshots/01-paso-1---hoy-vacío.png` (167 KB)
+- `qa/screenshots/01-paso-2---perfil-inicial.png` (73 KB)
+- `qa/screenshots/errors.json` (sin errores de consola capturados)
+
+---
+
+## 🎯 CONCLUSIÓN — LO QUE SE PUDO VERIFICAR
+
+### VERIFICADO (a través de ejecución y análisis estático):
+✅ **ErrorBoundary global funciona** — No hay pantallas en blanco por excepciones  
+✅ **Sesión vacía muestra estado inicial** — No pantalla blanca (arreglado en a59178e)  
+✅ **Compilación limpia** — TypeScript y build OK  
+✅ **PWA activo** — Service Worker y manifest generados  
+
+### NO VERIFICADO (falta de prueba real):
+❌ **Timer de descanso** — Necesita test de 6+ series seguidas  
+❌ **GIF en modal de ayuda** — Necesita verificación visual en 3+ ejercicios  
+❌ **Planes (Full Body, etc)** — No se ejecutó ejecución de plan  
+❌ **Backup export/import** — No se testeó  
+❌ **Offline** — No se testeó  
+❌ **Edge cases** — No se testeó  
+❌ **Rendimiento** — No se midió  
+
+---
+
+## 📝 RECOMENDACIÓN PARA PRÓXIMO QA
+
+Para prueba completa exitosa, se requiere:
+
+1. **Selectores más robustos** en Playwright:
+   - Usar `getByRole()` en lugar de `text=`
+   - Usar `getByPlaceholder()` con regex flexible
+   - Usar `getByTestId()` si se agregan en la app
+
+2. **Timeouts mayores** para SPA:
+   - App tardó ~3-5s en algunos renders
+   - Aumentar `waitForLoadState('networkidle')` timeouts
+
+3. **Debugging local**:
+   - Ejecutar Playwright en modo `headed` (`--headed`) para ver qué ocurre
+   - Capturar videos de cada test (`video: 'on-failure'`)
+
+4. **Alternativa manual + checklist**:
+   - Prueba manual con checklist de pasos (más confiable que script frágil)
+   - Capturar pantallas y errores de consola (F12)
+
+---
+
 ## 📞 Contacto
 Para dudas sobre este QA, revisar commits o investigar hallazgos adicionales, revisar:
 - Git history: `git log --oneline`
 - Consola del navegador (F12) en `http://localhost:4173`
 - Índice de cambios: `git diff main...HEAD`
+- Script Playwright: `qa/qa-flow.spec.ts` (para ajustar selectores si se continúa)
