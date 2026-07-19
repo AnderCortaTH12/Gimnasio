@@ -71,6 +71,54 @@ export function WorkoutDeckScreen() {
 
   if (!active) return null
 
+  // Si no hay ejercicios en la sesión, mostrar estado vacío
+  if (active.exercises.length === 0) {
+    const handleAddExercise = (ex: Exercise) => {
+      addEjercicio(ex)
+      setPickerOpen(false)
+      setToast({
+        tone: 'success',
+        message: `Añadido: ${ex.name}`,
+      })
+    }
+
+    return (
+      <div className="flex min-h-dvh flex-col bg-bg">
+        <div className="border-b border-border bg-surface/50 px-4 py-3 backdrop-blur-sm">
+          <p className="text-sm font-semibold text-text/50">Sesión vacía</p>
+        </div>
+        <div className="flex-1 flex flex-col items-center justify-center gap-6 px-4">
+          <div className="text-center">
+            <p className="text-lg font-bold text-text mb-2">Añade tu primer ejercicio</p>
+            <p className="text-sm text-text/60">No hay ejercicios registrados en esta sesión.</p>
+          </div>
+          <Button onClick={() => setPickerOpen(true)} className="w-full max-w-xs">
+            Añadir ejercicio
+          </Button>
+        </div>
+        <div className="border-t border-border bg-surface/50 backdrop-blur-sm px-3 py-2">
+          <div className="flex gap-2">
+            <Button
+              fullWidth
+              variant="secondary"
+              onClick={() => setPickerOpen(true)}
+              size="sm"
+              leftIcon={<Search className="h-4 w-4" />}
+            >
+              Cambiar / Añadir
+            </Button>
+          </div>
+        </div>
+        <ExercisePickerSheet
+          open={pickerOpen}
+          onClose={() => setPickerOpen(false)}
+          onPick={handleAddExercise}
+          yaAnadidos={[]}
+        />
+      </div>
+    )
+  }
+
   const currentExercise = active.exercises[currentExerciseIdx]
   if (!currentExercise) return null
 
