@@ -79,6 +79,7 @@ export function TodayScreen() {
           interactive
           onClick={() => navigate('/entrenar')}
           className="mb-6 flex items-center gap-4 border-lime/40 bg-lime/10"
+          data-testid="card-sesion-activa"
         >
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-lime/20">
             <Play className="h-6 w-6 text-lime" />
@@ -98,6 +99,7 @@ export function TodayScreen() {
           leftIcon={<Plus className="h-5 w-5" />}
           className="mb-6"
           onClick={empezar}
+          data-testid="btn-empezar-entreno"
         >
           Empezar entrenamiento
         </Button>
@@ -105,7 +107,7 @@ export function TodayScreen() {
 
       {/* Recomendaciones (reglas explicables) */}
       {recomendaciones.length > 0 && (
-        <div className="mb-6">
+        <div className="mb-6" data-testid="lista-recomendaciones">
           <SectionHeader
             title="Recomendaciones"
             subtitle="Basadas en tu historial y objetivo"

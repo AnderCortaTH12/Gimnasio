@@ -24,7 +24,7 @@ export function ExerciseHelpModal({
       />
 
       {/* Modal centrado */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4" data-testid="modal-ayuda">
         <div className="w-full max-w-sm bg-surface rounded-3xl border border-border p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
           {/* Botón cerrar */}
           <button
@@ -38,7 +38,7 @@ export function ExerciseHelpModal({
           <h2 className="mb-4 text-xl font-bold text-text">{exerciseName}</h2>
 
           {/* GIF */}
-          <div className="mb-6">
+          <div className="mb-6" data-testid="gif-ejercicio">
             <ExerciseGif gifUrl={gifUrl} name={exerciseName} variant="detail" />
           </div>
 

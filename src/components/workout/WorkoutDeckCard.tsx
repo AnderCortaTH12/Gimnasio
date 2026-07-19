@@ -76,6 +76,7 @@ export function WorkoutDeckCard({
               onClick={() => setShowHelp(true)}
               className="flex h-10 w-10 items-center justify-center rounded-xl bg-lime/10 text-lime hover:bg-lime/20 active:scale-90"
               title="Ver cómo hacer este ejercicio"
+              data-testid="btn-ayuda"
             >
               <HelpCircle className="h-5 w-5" />
             </button>
@@ -130,6 +131,7 @@ export function WorkoutDeckCard({
                   onChange={(e) => setWeight(parseFloat(e.target.value) || 0)}
                   className="min-w-0 flex-1 rounded-lg border border-border bg-bg px-3 py-2.5 text-center text-xl font-extrabold text-text focus:border-lime/50 focus:outline-none"
                   placeholder="0"
+                  data-testid="input-peso-serie"
                 />
                 <button
                   onClick={() => setWeight(weight + 2.5)}
@@ -159,6 +161,7 @@ export function WorkoutDeckCard({
                   onChange={(e) => setReps(parseInt(e.target.value) || 0)}
                   className="min-w-0 flex-1 rounded-lg border border-border bg-bg px-3 py-2.5 text-center text-xl font-extrabold text-text focus:border-lime/50 focus:outline-none"
                   placeholder="0"
+                  data-testid="input-reps-serie"
                 />
                 <button
                   onClick={() => setReps(reps + 1)}
@@ -215,6 +218,7 @@ export function WorkoutDeckCard({
                 <button
                   onClick={handleComplete}
                   className="flex-1 rounded-lg border border-pr bg-pr/5 py-2.5 text-sm font-bold text-pr active:bg-pr/10"
+                  data-testid="btn-completar-serie"
                 >
                   ✓ Completar
                 </button>

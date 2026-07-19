@@ -63,6 +63,7 @@ export function ExerciseFilters({
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Buscar ejercicio…"
           className="h-12 w-full rounded-2xl border border-border bg-surface pl-10 pr-10 text-sm text-text placeholder:text-text/40 focus:border-lime/50 focus:outline-none"
+          data-testid="buscador-ejercicios"
         />
         {query && (
           <button

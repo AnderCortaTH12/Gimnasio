@@ -246,7 +246,7 @@ export function WorkoutDeckScreen() {
               className="w-full max-w-md px-4"
             >
               {/* Temporizador de descanso */}
-              <div className="rounded-3xl border-2 border-lime bg-lime/5 p-6 text-center">
+              <div className="rounded-3xl border-2 border-lime bg-lime/5 p-6 text-center" data-testid="rest-timer">
                 <p className="mb-2 text-sm font-semibold text-text/50">Descansa</p>
                 <p className="text-6xl font-black tabular-nums text-lime">
                   {Math.max(0, Math.ceil((restTimer.endsAt - Date.now()) / 1000))}
@@ -277,6 +277,7 @@ export function WorkoutDeckScreen() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               className="w-full max-w-md px-4"
+              data-testid="card-siguiente"
             >
               {/* Fin del ejercicio */}
               <div className="rounded-3xl border border-border bg-surface p-6 text-center">
@@ -359,6 +360,7 @@ export function WorkoutDeckScreen() {
               variant="secondary"
               onClick={() => setCurrentExerciseIdx(currentExerciseIdx - 1)}
               size="sm"
+              data-testid="btn-anterior-ejercicio"
             >
               ←
             </Button>
@@ -367,6 +369,7 @@ export function WorkoutDeckScreen() {
             <Button
               onClick={() => setCurrentExerciseIdx(currentExerciseIdx + 1)}
               size="sm"
+              data-testid="btn-siguiente-ejercicio"
             >
               →
             </Button>

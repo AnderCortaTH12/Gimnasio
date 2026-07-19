@@ -57,7 +57,7 @@ export function ExercisePickerSheet({
           <ExerciseFilters {...f} />
         </div>
 
-        <ul ref={scrollRef} className="flex-1 overflow-y-auto px-4 pb-4 pt-2">
+        <ul ref={scrollRef} className="flex-1 overflow-y-auto px-4 pb-4 pt-2" data-testid="lista-ejercicios">
           {visible.map((ex) => {
             const added = yaAnadidos.includes(ex.id)
             return (
@@ -65,6 +65,7 @@ export function ExercisePickerSheet({
                 <button
                   onClick={() => onPick(ex)}
                   className="flex w-full items-center gap-3 rounded-2xl border border-transparent px-2 py-2.5 text-left transition-colors active:bg-white/5"
+                  data-testid={`item-ejercicio-${ex.id}`}
                 >
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-lime/10 text-xs font-black text-lime">
                     {traducirMusculo(ex.muscleGroup).slice(0, 2).toUpperCase()}

@@ -78,6 +78,7 @@ export function EditProfileSheet({
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Tu nombre"
+            data-testid="input-nombre"
           />
         </Field>
 
@@ -90,6 +91,7 @@ export function EditProfileSheet({
               value={peso}
               onChange={(e) => setPeso(e.target.value)}
               placeholder="0"
+              data-testid="input-peso"
             />
           </Field>
           <Field label="Altura (cm)">
@@ -99,6 +101,7 @@ export function EditProfileSheet({
               value={altura}
               onChange={(e) => setAltura(e.target.value)}
               placeholder="0"
+              data-testid="input-altura"
             />
           </Field>
         </div>
@@ -110,6 +113,7 @@ export function EditProfileSheet({
             value={edad}
             onChange={(e) => setEdad(e.target.value)}
             placeholder="años"
+            data-testid="input-edad"
           />
         </Field>
 
@@ -137,7 +141,7 @@ export function EditProfileSheet({
           />
         </Field>
 
-        <Button fullWidth size="lg" onClick={guardar}>
+        <Button fullWidth size="lg" onClick={guardar} data-testid="btn-guardar-perfil">
           Guardar cambios
         </Button>
       </div>

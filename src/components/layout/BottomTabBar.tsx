@@ -31,12 +31,21 @@ export function BottomTabBar() {
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       <ul className="mx-auto flex max-w-md items-stretch justify-around">
-        {TABS.map(({ to, label, icon: Icon }) => (
+        {TABS.map(({ to, label, icon: Icon }) => {
+          const testId = {
+            '/': 'tab-hoy',
+            '/historial': 'tab-historial',
+            '/progreso': 'tab-progreso',
+            '/ejercicios': 'tab-ejercicios',
+            '/perfil': 'tab-perfil',
+          }[to]
+          return (
           <li key={to} className="flex-1">
             <NavLink
               to={to}
               end={to === '/'}
               className="group flex flex-col items-center gap-1 py-2.5"
+              data-testid={testId}
             >
               {({ isActive }) => (
                 <>
@@ -66,7 +75,8 @@ export function BottomTabBar() {
               )}
             </NavLink>
           </li>
-        ))}
+        )
+        })}
       </ul>
     </nav>
   )
