@@ -30,10 +30,23 @@ function App() {
 
   useEffect(() => {
     const init = async () => {
-      await hidratar()
-      await cargarCatalogo()
-      const necesita = await debeHayerOnboarding()
-      setNecesitaOnboarding(necesita)
+      try {
+        console.log('[App] Iniciando hidratación...')
+        await hidratar()
+        console.log('[App] Hidratación completada')
+
+        console.log('[App] Cargando catálogo...')
+        await cargarCatalogo()
+        console.log('[App] Catálogo cargado')
+
+        console.log('[App] Verificando onboarding...')
+        const necesita = await debeHayerOnboarding()
+        console.log('[App] Onboarding necesario:', necesita)
+        setNecesitaOnboarding(necesita)
+      } catch (err) {
+        console.error('[App] Error fatal en inicialización:', err)
+        throw err
+      }
     }
     void init()
   }, [hidratar, cargarCatalogo])
