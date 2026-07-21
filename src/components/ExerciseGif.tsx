@@ -70,7 +70,6 @@ export function ExerciseGif({
       <img
         src={gifUrl}
         alt={`Animación del ejercicio ${name}`}
-        loading="lazy"
         onLoad={() => setEstado('ok')}
         onError={() => setEstado('error')}
         className={cn(
