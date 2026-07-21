@@ -16,6 +16,7 @@ import type {
   WorkoutPlan,
   WorkoutPlanExecution,
 } from '../types'
+import type { TrainingSchedule, CompletedDay } from '../types/schedule'
 
 /** Base de datos de FORJA. Una única instancia compartida en toda la app. */
 class ForjaDB extends Dexie {
@@ -33,6 +34,10 @@ class ForjaDB extends Dexie {
   workoutPlans!: Table<WorkoutPlan, string>
   /** Ejecuciones de planes de entrenamiento (fase 7). */
   workoutPlanExecutions!: Table<WorkoutPlanExecution, string>
+  /** Planificación semanal de entrenamientos (fase 9). */
+  trainingSchedule!: Table<TrainingSchedule, string>
+  /** Días completados/saltados del calendario (fase 9). */
+  completedDays!: Table<CompletedDay, string>
 
   constructor() {
     super('forja')
@@ -54,6 +59,12 @@ class ForjaDB extends Dexie {
     this.version(3).stores({
       workoutPlans: 'id, createdBy, createdAt',
       workoutPlanExecutions: 'id, planId, sessionId, startTime, completed',
+    })
+
+    // v4 — planificación semanal y seguimiento de días completados (fase 9).
+    this.version(4).stores({
+      trainingSchedule: 'id, isActive',
+      completedDays: 'id, date, dayOfWeek, sessionId',
     })
   }
 }
@@ -441,6 +452,107 @@ export async function eliminarMedida(id: string): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
+// Planificación semanal (fase 9)
+// ---------------------------------------------------------------------------
+
+/** Crea o actualiza la planificación semanal activa del usuario. */
+export async function guardarPlanificacion(schedule: TrainingSchedule): Promise<void> {
+  // Desactiva cualquier otra planificación activa
+  const activa = await db.trainingSchedule.where('isActive').equals(true).toArray()
+  for (const s of activa) {
+    if (s.id !== schedule.id) {
+      await db.trainingSchedule.update(s.id, { isActive: false })
+    }
+  }
+  // Guarda la nueva
+  await db.trainingSchedule.put(schedule)
+}
+
+/** Lee la planificación activa, o undefined si no hay. */
+export async function leerPlanificacionActiva(): Promise<TrainingSchedule | undefined> {
+  const activa = await db.trainingSchedule.where('isActive').equals(true).first()
+  return activa
+}
+
+/** Lee TODAS las planificaciones (historial). */
+export async function leerTodasLasPlanificaciones(): Promise<TrainingSchedule[]> {
+  const all = await db.trainingSchedule.toArray()
+  return all.sort((a, b) => b.updatedAt - a.updatedAt)
+}
+
+/** Marca un día como completado (enlaza a una sesión real). */
+export async function marcarDiaCompletado(input: {
+  date: string // YYYY-MM-DD
+  dayOfWeek: 0 | 1 | 2 | 3 | 4 | 5 | 6
+  trainingType: string
+  sessionId: string
+}): Promise<void> {
+  const completed: CompletedDay = {
+    id: nuevoId(),
+    date: input.date,
+    dayOfWeek: input.dayOfWeek as 0 | 1 | 2 | 3 | 4 | 5 | 6,
+    trainingType: input.trainingType as any,
+    sessionId: input.sessionId,
+    completedAt: Date.now(),
+    skipped: false,
+  }
+  await db.completedDays.put(completed)
+}
+
+/** Marca un día como saltado/fallido. */
+export async function marcarDiaSaltado(input: {
+  date: string
+  dayOfWeek: 0 | 1 | 2 | 3 | 4 | 5 | 6
+  trainingType: string
+}): Promise<void> {
+  const skipped: CompletedDay = {
+    id: nuevoId(),
+    date: input.date,
+    dayOfWeek: input.dayOfWeek as 0 | 1 | 2 | 3 | 4 | 5 | 6,
+    trainingType: input.trainingType as any,
+    sessionId: '',
+    completedAt: Date.now(),
+    skipped: true,
+  }
+  await db.completedDays.put(skipped)
+}
+
+/** Lee los días completados en un rango de fechas. */
+export async function leerDiasCompletados(desde: string, hasta: string): Promise<CompletedDay[]> {
+  return db.completedDays.where('date').between(desde, hasta).toArray()
+}
+
+/** Lee un día completado por fecha. */
+export async function leerDiaCompletado(date: string): Promise<CompletedDay | undefined> {
+  return db.completedDays.where('date').equals(date).first()
+}
+
+/** Estadísticas de adherencia: cuántos días completados/saltados en la última semana. */
+export async function estadisticasAdherencia(): Promise<{
+  completados7: number
+  saltados7: number
+  total7: number
+  porcentaje: number
+}> {
+  const DIA = 24 * 3600 * 1000
+  const ahora = new Date()
+  ahora.setHours(0, 0, 0, 0)
+  const hace7 = new Date(ahora.getTime() - 7 * DIA).toISOString().split('T')[0]
+  const hoy = ahora.toISOString().split('T')[0]
+
+  const dias = await leerDiasCompletados(hace7, hoy)
+  const completados = dias.filter((d) => !d.skipped).length
+  const saltados = dias.filter((d) => d.skipped).length
+
+  return {
+    completados7: completados,
+    saltados7: saltados,
+    total7: dias.length,
+    porcentaje: dias.length > 0 ? Math.round((completados / dias.length) * 100) : 0,
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Copia de seguridad (export / import)
 // ---------------------------------------------------------------------------
 
@@ -460,19 +572,33 @@ export interface BackupData {
   plans?: WorkoutPlan[]
   /** Ejecuciones de planes (opcional: backups antiguos no lo traen). */
   planExecutions?: WorkoutPlanExecution[]
+  /** Planificación de entrenamientos (opcional: backups antiguos no lo traen). */
+  trainingSchedules?: TrainingSchedule[]
+  /** Días completados del calendario (opcional: backups antiguos no lo traen). */
+  completedDays?: CompletedDay[]
 }
 
 /** Lee todas las tablas y devuelve un objeto de backup serializable. */
 export async function exportarDatos(): Promise<BackupData> {
-  const [sessions, exercises, bodyMetrics, profile, plans, planExecutions] =
-    await Promise.all([
-      db.sessions.toArray(),
-      db.exercises.toArray(),
-      db.bodyMetrics.toArray(),
-      db.profile.toArray(),
-      db.workoutPlans.toArray(),
-      db.workoutPlanExecutions.toArray(),
-    ])
+  const [
+    sessions,
+    exercises,
+    bodyMetrics,
+    profile,
+    plans,
+    planExecutions,
+    trainingSchedules,
+    completedDays,
+  ] = await Promise.all([
+    db.sessions.toArray(),
+    db.exercises.toArray(),
+    db.bodyMetrics.toArray(),
+    db.profile.toArray(),
+    db.workoutPlans.toArray(),
+    db.workoutPlanExecutions.toArray(),
+    db.trainingSchedule.toArray(),
+    db.completedDays.toArray(),
+  ])
   return {
     app: 'forja',
     version: BACKUP_VERSION,
@@ -483,6 +609,8 @@ export async function exportarDatos(): Promise<BackupData> {
     profile,
     plans,
     planExecutions,
+    trainingSchedules,
+    completedDays,
   }
 }
 
@@ -517,6 +645,8 @@ export async function importarDatos(data: BackupData): Promise<void> {
       db.profile,
       db.workoutPlans,
       db.workoutPlanExecutions,
+      db.trainingSchedule,
+      db.completedDays,
     ],
     async () => {
       await Promise.all([
@@ -526,6 +656,8 @@ export async function importarDatos(data: BackupData): Promise<void> {
         db.profile.clear(),
         db.workoutPlans.clear(),
         db.workoutPlanExecutions.clear(),
+        db.trainingSchedule.clear(),
+        db.completedDays.clear(),
       ])
       await Promise.all([
         db.sessions.bulkPut(data.sessions),
@@ -534,6 +666,8 @@ export async function importarDatos(data: BackupData): Promise<void> {
         db.profile.bulkPut(data.profile),
         db.workoutPlans.bulkPut(data.plans ?? []),
         db.workoutPlanExecutions.bulkPut(data.planExecutions ?? []),
+        db.trainingSchedule.bulkPut(data.trainingSchedules ?? []),
+        db.completedDays.bulkPut(data.completedDays ?? []),
       ])
     },
   )

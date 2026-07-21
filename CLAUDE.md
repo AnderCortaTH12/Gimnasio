@@ -162,12 +162,43 @@ GImnasio/
 > **Animaciones/microinteracciones**: no son una fase aparte (base en Fase 1,
 > confeti/PR en Fase 4).
 
+- **Fase 8 — Fix: Resolución real de GIFs** ✅: Eliminado atributo `loading="lazy"`
+  que prevenía la carga de GIFs. Verificación: `naturalWidth > 0` comprueba que
+  la imagen se descargó realmente. Test de Playwright en `tests/gif-loading.spec.ts`.
+  Commit: "fix: resolucion real de gifs verificada por carga - remover loading=lazy".
+
+- **Fase 9 — Calendario, onboarding y rediseño de HOY** ✅:
+  - **Onboarding** (primer arranque, pocas pantallas con barra de progreso):
+    Preguntas: nivel (principiante/intermedio/avanzado), objetivo (fuerza/hipertrofia/
+    mantenimiento), días/semana (2-6), días específicos, duración sesión, equipo
+    disponible (gimnasio/básico/casa). Genera plan automático: 2-3 días → Full Body,
+    4 días → Upper/Lower, 5-6 → Push/Pull/Legs. Respeta descanso entre grupos.
+    Guardado en tabla `trainingSchedule` (esquema v4). Puede repetirse desde Perfil.
+  - **Calendario mensual**: Coloreado por tipo de entrenamiento (colores consistentes),
+    hoy destacado, días completados con check, saltados con alerta, descanso neutro.
+    Al pulsar día: detalle con ejercicios y botón "Empezar". Navegación entre meses.
+  - **Rediseño pantalla HOY**: (a) Cabecera compacta (saludo + fecha + racha),
+    (b) Tarjeta protagonista "Hoy toca {tipo}" con ejercicios resumidos + duración +
+    botón "Empezar" grande. Si descanso: "Hoy descansas" con opción "Entrenar igualmente",
+    (c) Tira semanal horizontal (7 días, colores, check, hoy marcado) → toca para calendar,
+    (d) Resumen esta semana (días, volumen, adherencia %), (e) Recomendaciones,
+    (f) Accesos rápidos (Libre, Ejercicios, Progreso). Objetivo: responde "¿qué hago hoy?"
+    sin scroll.
+  - **Seguimiento adherencia**: Al terminar sesión, marcar día completado (enlaza a
+    sesión real). Estadística: "Has cumplido 3 de 4 entrenos esta semana". Si se salta
+    día, ofrecer reprogramar. Funciones en `db.ts`: `marcarDiaCompletado`, `marcarDiaSaltado`,
+    `leerDiasCompletados`, `estadisticasAdherencia`. Motor generador en `lib/schedule-generator.ts`.
+    Store en `store/onboardingStore.ts`. Componentes en `components/onboarding/`,
+    `components/calendar/`, `components/today/`. Incluidos en backup/import.
+
 ## Estado del proyecto
 
-**Todas las fases (0–7) completadas.** La app es funcional de principio a fin:
+**Todas las fases (0–9) completadas.** La app es funcional de principio a fin:
 registro de entrenos, historial, progreso/PRs, perfil/medidas/IMC, motor de
-recomendaciones, backup export/import, PWA instalable/offline y catálogo de
-1.324 ejercicios con GIFs. Todo offline-first sobre IndexedDB.
+recomendaciones, backup export/import, PWA instalable/offline, catálogo de
+1.324 ejercicios con GIFs verificados, planes de entrenamiento personalizados,
+**calendario de entrenamientos**, **onboarding inteligente**, y **pantalla HOY
+rediseñada**. Todo offline-first sobre IndexedDB con seguimiento de adherencia.
 
 ## Instalación y uso
 
