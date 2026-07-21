@@ -43,7 +43,7 @@ function AppContent() {
       }
     }
     void init()
-  }, [hidratar, cargarCatalogo, location.pathname])
+  }, [hidratar, cargarCatalogo, location.key])
 
   return necesitaOnboarding === null ? (
     <div className="min-h-screen bg-bg flex items-center justify-center">
