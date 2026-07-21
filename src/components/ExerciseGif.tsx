@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Dumbbell, ImageOff } from 'lucide-react'
+import { Skeleton } from './ui/Skeleton'
 import { cn } from '../lib/cn'
 
 interface Props {
@@ -13,8 +14,9 @@ interface Props {
 
 /**
  * Muestra el GIF animado de un ejercicio con estados de carga y error.
- * - Cargando: skeleton gris con spinner.
+ * - Cargando: skeleton con shimmer.
  * - Error o sin URL: placeholder gris con icono + "Sin animación".
+ * - Cargado: transición suave con fadeIn.
  */
 export function ExerciseGif({
   gifUrl,
@@ -28,7 +30,7 @@ export function ExerciseGif({
 
   const esDetalle = variant === 'detail'
   const contenedor = cn(
-    'relative overflow-hidden bg-white/[0.03]',
+    'relative overflow-hidden',
     esDetalle ? 'aspect-square w-full rounded-2xl' : 'h-16 w-16 rounded-xl',
     className,
   )
@@ -39,7 +41,7 @@ export function ExerciseGif({
       <div
         className={cn(
           contenedor,
-          'flex flex-col items-center justify-center gap-1 text-text/30',
+          'flex flex-col items-center justify-center gap-1 text-text/30 bg-white/[0.03]',
         )}
       >
         {esDetalle ? (
@@ -56,16 +58,9 @@ export function ExerciseGif({
 
   return (
     <div className={contenedor}>
-      {/* Skeleton + spinner mientras carga */}
+      {/* Skeleton mientras carga */}
       {estado === 'cargando' && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white/[0.03]">
-          <span
-            className={cn(
-              'animate-spin rounded-full border-2 border-white/10 border-t-lime',
-              esDetalle ? 'h-8 w-8' : 'h-5 w-5',
-            )}
-          />
-        </div>
+        <Skeleton className="absolute inset-0" animated />
       )}
       <img
         src={gifUrl}
@@ -74,7 +69,7 @@ export function ExerciseGif({
         onError={() => setEstado('error')}
         className={cn(
           'h-full w-full object-cover transition-opacity duration-300',
-          estado === 'ok' ? 'opacity-100' : 'opacity-0',
+          estado === 'ok' ? 'opacity-100 animate-fadeIn' : 'opacity-0',
         )}
       />
     </div>

@@ -1,7 +1,7 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import { cn } from '../../lib/cn'
 
-type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'
+type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'outline'
 type Size = 'sm' | 'md' | 'lg'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -15,11 +15,12 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const VARIANTS: Record<Variant, string> = {
   // Acento lima con texto oscuro para máximo contraste
-  primary: 'bg-lime text-bg font-bold hover:brightness-105 active:brightness-95',
+  primary: 'bg-lime text-bg font-bold hover:brightness-105 active:brightness-95 shadow-lg shadow-lime/20',
   secondary:
-    'bg-surface text-text border border-border hover:border-lime/40 active:bg-white/5',
+    'bg-surface text-text border border-border hover:border-lime/40 hover:bg-white/[0.02] active:bg-white/5',
   ghost: 'bg-transparent text-text/80 hover:bg-white/5 active:bg-white/10',
   danger: 'bg-regress/15 text-regress border border-regress/30 hover:bg-regress/25',
+  outline: 'bg-transparent border-2 border-text/20 text-text hover:border-lime/40 hover:bg-white/[0.02]',
 }
 
 const SIZES: Record<Size, string> = {
