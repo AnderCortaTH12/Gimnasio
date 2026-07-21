@@ -63,7 +63,7 @@ class ForjaDB extends Dexie {
 
     // v4 — planificación semanal y seguimiento de días completados (fase 9).
     this.version(4).stores({
-      trainingSchedule: 'id, isActive',
+      trainingSchedule: 'id',
       completedDays: 'id, date, dayOfWeek, sessionId',
     })
   }

@@ -30,9 +30,6 @@ export interface BodyMetric {
   notes?: string
 }
 
-/** Objetivo de entrenamiento del usuario. */
-export type TrainingGoal = 'fuerza' | 'hipertrofia' | 'mantenimiento'
-
 export interface UserProfile {
   /** Clave fija; solo existe un perfil (monousuario). */
   id: 'profile'

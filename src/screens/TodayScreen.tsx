@@ -173,13 +173,12 @@ export function TodayScreen() {
         {recomendaciones.length > 0 && (
           <div>
             <SectionHeader
-              icon={Sparkles}
               title="Recomendaciones"
               subtitle="Basadas en tu historial"
             />
             <div className="space-y-3">
               {recomendaciones.slice(0, 2).map((rec, i) => (
-                <RecommendationCard key={i} recommendation={rec} />
+                <RecommendationCard key={i} rec={rec} />
               ))}
             </div>
           </div>

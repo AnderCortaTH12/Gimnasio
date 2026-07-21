@@ -135,9 +135,7 @@ export function TrainingCalendar({ weekPlan, completedDays, onSelectDay }: Props
                 'aspect-square rounded-lg flex flex-col items-center justify-center text-sm font-medium transition-all relative',
                 isCompleted || training.trainingType === 'rest'
                   ? 'bg-white/5 border border-border'
-                  : training.trainingType === 'rest'
-                    ? 'bg-white/5 border border-border'
-                    : 'border-2',
+                  : 'border-2',
                 isCompleted
                   ? 'bg-lime/20 border-lime text-lime'
                   : isSkipped

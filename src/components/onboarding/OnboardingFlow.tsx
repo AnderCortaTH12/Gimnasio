@@ -10,17 +10,6 @@ import { useOnboardingStore, type OnboardingStep } from '../../store/onboardingS
 import { Button } from '../ui/Button'
 import { cn } from '../../lib/cn'
 
-const STEP_LABELS: Record<OnboardingStep, string> = {
-  level: 'Nivel',
-  goal: 'Objetivo',
-  'days-per-week': 'Frecuencia',
-  'training-days': 'Días',
-  'session-duration': 'Duración',
-  equipment: 'Equipo',
-  review: 'Resumen',
-  done: 'Listo',
-}
-
 const STEP_ORDER: OnboardingStep[] = [
   'level',
   'goal',
@@ -32,7 +21,7 @@ const STEP_ORDER: OnboardingStep[] = [
 ]
 
 export function OnboardingFlow() {
-  const { step, data, saving, setStep, updateData, nextStep, prevStep, finalizarOnboarding } =
+  const { step, data, saving, updateData, nextStep, prevStep, finalizarOnboarding } =
     useOnboardingStore()
   const [error, setError] = useState<string>('')
 
