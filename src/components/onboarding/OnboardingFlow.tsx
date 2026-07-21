@@ -22,10 +22,14 @@ const STEP_ORDER: OnboardingStep[] = [
 ]
 
 export function OnboardingFlow() {
+  console.log('[OnboardingFlow] Renderizando')
   const navigate = useNavigate()
-  const { step, data, saving, updateData, nextStep, prevStep, finalizarOnboarding } =
-    useOnboardingStore()
+  console.log('[OnboardingFlow] useNavigate OK')
+  const onboardingState = useOnboardingStore()
+  console.log('[OnboardingFlow] useOnboardingStore OK, step:', onboardingState.step)
+  const { step, data, saving, updateData, nextStep, prevStep, finalizarOnboarding } = onboardingState
   const [error, setError] = useState<string>('')
+  console.log('[OnboardingFlow] Todos los hooks inicializados')
 
   // Al completar onboarding, navega a TodayScreen
   useEffect(() => {
