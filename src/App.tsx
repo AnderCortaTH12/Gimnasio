@@ -51,33 +51,29 @@ function App() {
     void init()
   }, [hidratar, cargarCatalogo])
 
-  if (necesitaOnboarding === null) {
-    return (
-      <div className="min-h-screen bg-bg flex items-center justify-center">
-        <div className="text-text/50">Cargando...</div>
-      </div>
-    )
-  }
-
-  if (necesitaOnboarding) {
-    return <OnboardingFlow />
-  }
-
   return (
     <BrowserRouter>
-      <Routes>
-        <Route element={<AppLayout />}>
-          <Route index element={<TodayScreen />} />
-          <Route path="entrenar" element={<WorkoutScreen />} />
-          <Route path="historial" element={<HistoryScreen />} />
-          <Route path="historial/:id" element={<SessionDetailScreen />} />
-          <Route path="progreso" element={<ProgressScreen />} />
-          <Route path="ejercicios" element={<ExercisesScreen />} />
-          <Route path="ejercicios/:id" element={<ExerciseDetailScreen />} />
-          <Route path="perfil" element={<ProfileScreen />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Route>
-      </Routes>
+      {necesitaOnboarding === null ? (
+        <div className="min-h-screen bg-bg flex items-center justify-center">
+          <div className="text-text/50">Cargando...</div>
+        </div>
+      ) : necesitaOnboarding ? (
+        <OnboardingFlow />
+      ) : (
+        <Routes>
+          <Route element={<AppLayout />}>
+            <Route index element={<TodayScreen />} />
+            <Route path="entrenar" element={<WorkoutScreen />} />
+            <Route path="historial" element={<HistoryScreen />} />
+            <Route path="historial/:id" element={<SessionDetailScreen />} />
+            <Route path="progreso" element={<ProgressScreen />} />
+            <Route path="ejercicios" element={<ExercisesScreen />} />
+            <Route path="ejercicios/:id" element={<ExerciseDetailScreen />} />
+            <Route path="perfil" element={<ProfileScreen />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Route>
+        </Routes>
+      )}
     </BrowserRouter>
   )
 }
