@@ -134,9 +134,9 @@ export function EditProfileSheet({
             value={objetivo}
             onChange={setObjetivo}
             options={[
-              { value: 'fuerza', label: 'Fuerza' },
-              { value: 'hipertrofia', label: 'Hipertrofia' },
-              { value: 'mantenimiento', label: 'Mantener' },
+              { value: 'strength', label: 'Fuerza' },
+              { value: 'hypertrophy', label: 'Hipertrofia' },
+              { value: 'maintenance', label: 'Mantener' },
             ]}
           />
         </Field>

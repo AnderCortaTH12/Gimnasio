@@ -185,7 +185,7 @@ export function TodayScreen() {
         )}
 
         {/* Planes */}
-        <PlansSection />
+        <PlansSection sessions={historial} />
 
         {/* Accesos rápidos */}
         <div className="space-y-3">

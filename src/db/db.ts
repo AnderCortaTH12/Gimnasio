@@ -458,8 +458,9 @@ export async function eliminarMedida(id: string): Promise<void> {
 /** Crea o actualiza la planificación semanal activa del usuario. */
 export async function guardarPlanificacion(schedule: TrainingSchedule): Promise<void> {
   // Desactiva cualquier otra planificación activa
-  const activa = await db.trainingSchedule.where('isActive').equals(true).toArray()
-  for (const s of activa) {
+  const todas = await db.trainingSchedule.toArray()
+  const activas = todas.filter((s) => s.isActive)
+  for (const s of activas) {
     if (s.id !== schedule.id) {
       await db.trainingSchedule.update(s.id, { isActive: false })
     }
@@ -470,8 +471,8 @@ export async function guardarPlanificacion(schedule: TrainingSchedule): Promise<
 
 /** Lee la planificación activa, o undefined si no hay. */
 export async function leerPlanificacionActiva(): Promise<TrainingSchedule | undefined> {
-  const activa = await db.trainingSchedule.where('isActive').equals(true).first()
-  return activa
+  const todas = await db.trainingSchedule.toArray()
+  return todas.find((s) => s.isActive)
 }
 
 /** Lee TODAS las planificaciones (historial). */

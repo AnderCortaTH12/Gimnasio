@@ -2,6 +2,8 @@
  * Modelos de medidas corporales y perfil de usuario.
  */
 
+import type { TrainingGoal } from './schedule'
+
 /** Sistema de unidades preferido. */
 export type UnitSystem = 'metrico' | 'imperial'
 
