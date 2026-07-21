@@ -5,7 +5,8 @@
  * equipo, revisión.
  */
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useOnboardingStore, type OnboardingStep } from '../../store/onboardingStore'
 import { Button } from '../ui/Button'
 import { cn } from '../../lib/cn'
@@ -21,9 +22,17 @@ const STEP_ORDER: OnboardingStep[] = [
 ]
 
 export function OnboardingFlow() {
+  const navigate = useNavigate()
   const { step, data, saving, updateData, nextStep, prevStep, finalizarOnboarding } =
     useOnboardingStore()
   const [error, setError] = useState<string>('')
+
+  // Al completar onboarding, navega a TodayScreen
+  useEffect(() => {
+    if (step === 'done') {
+      navigate('/', { replace: true })
+    }
+  }, [step, navigate])
 
   const stepIndex = STEP_ORDER.indexOf(step)
   const progress = ((stepIndex + 1) / (STEP_ORDER.length + 1)) * 100
