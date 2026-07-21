@@ -23,7 +23,6 @@ const DAY_NAMES = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sab']
 export function WeekStrip({ weekPlan, completedDays, onViewCalendar }: Props) {
   const today = new Date()
   const todayDay = today.getDay() as 0 | 1 | 2 | 3 | 4 | 5 | 6
-  const todayStr = today.toISOString().split('T')[0]
 
   return (
     <button

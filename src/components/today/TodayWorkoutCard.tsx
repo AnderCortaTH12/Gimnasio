@@ -78,7 +78,7 @@ export function TodayWorkoutCard({ training, isRest, onStart, loading }: Props) 
             training.trainingType === 'lower' && 'Peso muerto',
             training.trainingType === 'full_body' && 'Squat',
           ]
-            .filter(Boolean)
+            .filter((x): x is string => typeof x === 'string')
             .map((ex) => (
               <span
                 key={ex}

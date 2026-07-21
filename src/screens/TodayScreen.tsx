@@ -12,7 +12,6 @@ import {
   estadisticasAdherencia,
 } from '../db/db'
 import { generarRecomendaciones } from '../recommendations'
-import { PageTitle } from '../components/PageTitle'
 import { RecommendationCard } from '../components/RecommendationCard'
 import { PlansSection } from '../components/plans/PlansSection'
 import { TodayWorkoutCard } from '../components/today/TodayWorkoutCard'
@@ -67,7 +66,6 @@ export function TodayScreen() {
 
   // Hoy
   const hoy = new Date()
-  const todayStr = hoy.toISOString().split('T')[0]
   const todayOfWeek = hoy.getDay() as 0 | 1 | 2 | 3 | 4 | 5 | 6
   const todayTraining = schedule?.weekPlan[todayOfWeek] || {
     dayOfWeek: todayOfWeek,

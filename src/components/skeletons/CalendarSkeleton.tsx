@@ -2,7 +2,7 @@
  * Skeletons para calendario y pantalla HOY.
  */
 
-import { Skeleton, SkeletonText } from '../ui/Skeleton'
+import { Skeleton } from '../ui/Skeleton'
 
 export function CalendarSkeleton() {
   return (
